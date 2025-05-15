@@ -45,26 +45,13 @@ end
 
 %% - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
-
-
-
 % - - - - - - - - - - physics constants
 kB = par.kB; q = par.q; e = par.e; epp0 = par.epp0; T = par.T;
-
-
-
 
 % - - - - - - - - - - * constants for nernst & butler-volmer calculation
 E_st = par.E_st; R = par.R; F = par.F;
 z = par.z; j0 = par.j0; alpha_e = par.alpha_c;
 E_hyd = par.E_hyd;
-% E_st = -0.152; % standard potential for Ag/AgI
-% R = 8.314; % universal gas constant
-% F = 96485.33; % Faraday constant
-% z = 1; % charge transfer
-% j0 = 1e-12; % exchange curent density 
-% % j0 = 0; % (no butler-volmer flux)
-% alpha_e = 0.5; % electrode charge transfer coefficient
 
 % - - - - - - - - - - spatial mesh
 xmesh = par.xx; % spatial mesh, thickness of the device
@@ -420,19 +407,22 @@ end
         rho_boundary = dfcalc.denstochemact(a_boundary);
         E_eq = dfcalc.nernst(rho_boundary, E_st, R, T, F, z); % SHE potential
  
-        %  - - - - - - - - - - butler-volmer electrochemical current at right hand interface
-        % In this implementation, the current arises from the reaction of iodide interstials with Ag at the 
-        % electrode.
-        %  - - - - - Note
-        % calculate electrode potential of right hand boundary on the electrochemical scale.
-        % use the standard potential of the Ag + I- <--> AgI + e- reaction and the standard hydrogen potential relative to vacuum
-        % E_hyd = -4.44;
+        % - - - - - - - - - - butler-volmer electrochemical current (at right hand interface)
+        %
+        % - - - - - Note
+        % In resistive switching, the reaction between iodine interstitial and silver electrode happens,
+        % Ag + I- <--> AgI + e-
+        % the butler-volmer current arises from the reaction.
+        %
+        % In driftfusion, the potential of the left electrode is set to zero;
+        % therefore, an adjustment is added to the standard potential. 
+        % In details, the left electrode is set to be zero (reference point),
+        % but in vaccum the hydrogen is the reference point,
+        % the standard potential of the Ag/AgI should be adjusted.
+
         E_st_bv = par.Phi_left - E_hyd + E_st;
         E_boundary = E_st_bv + V_r;
         eta = E_boundary - E_eq;
-        % in df, the left electrode is set to be 0 (reference point),
-        % but the in vaccum the hydrogen is the reference point,
-        % the standard potential of the Ag/AgI should be adjusted.
 
         j_bv = dfcalc.butlervolmer(j0, alpha_e, R, T, F, E_boundary, E_eq); % butler-volmer current density
         f_bv = j_bv / e; % butler-volmer ionic flux

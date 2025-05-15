@@ -283,11 +283,11 @@ classdef pc
         E2_func = [];
 
         % - - - - - - - - - - nernst equation calculation
-        E_st = -0.152; % standard potential of Ag/AgI (V)
+        E_st = 0.152; % standard potential of Ag + I- --> AgI + e-
         z = 1; % charge transfer (AgI + e- <--> Ag+ + I-)
         
         % - - - - - - - - - - butler-volmer calculation
-        j0 = 5e-12; % exchange current density
+        j0 = 1e-12; % exchange current density
         alpha_a = 0.5; % anode charge transfer coefficient
         alpha_c = 0.5; % cathode charge transfer coefficient
         E_hyd = -4.44; % vaccum potential for hydrogen

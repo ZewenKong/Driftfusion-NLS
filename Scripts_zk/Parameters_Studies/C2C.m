@@ -21,7 +21,7 @@ cycle = 1; % cycle value
 
 %% - - - - - - - - - - DO MEASUREMENT - - - - - - - - - -
 
-sol = doCV(soleq.ion, 0, 0, -1, 1, 5e-2, cycle, 500); % solution
+sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500); % solution
 
 xmesh = sol.x; xpos = 0;
 ppos = getpointpos(xpos, xmesh);
