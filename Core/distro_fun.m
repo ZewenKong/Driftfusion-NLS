@@ -1,70 +1,84 @@
 classdef distro_fun
-% DRIFTFUSION distribution function class -
-% calculates carrier densities for different distribution functions -
-%
-%% LICENSE
-% Copyright (C) 2020  Philip Calado, Ilario Gelmetti, and Piers R. F. Barnes
-% Imperial College London
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU Affero General Public License as published
-% by the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-%
-%% Start code
+
+% DRIFTFUSION distribution function class calculates carrier densities for 
+% different distribution functions.
+
+%% - - - - - - - - - - CODE START - - - - - - - - - -
+
     properties (Constant)
-        % These cannot be altered
         
-        % Physical constants
-        kB = 8.617330350e-5;       % Boltzmann constant [eV K^-1]
-        uplimit = 10;              % Upper limit for the integration [eV]
+        kB = 8.617330350e-5; % Boltzmann constant [eV K^-1]
+        uplimit = 10; % Upper limit for the integration [eV]
     end
     
     methods (Static)
         
         function n = nfun(Nc, Ec, Efn, par)
-            kT = par.kB*par.T;
+            
+            % nfun, negative function (electron density, conduction band
+            % energy, electron quasi fermi level, par)
+            % n, charge carrier density
+
+            kT = par.kB * par.T;
             
             switch par.prob_distro_function
+                
                 case 'Fermi'
+
                     % Fermi dirac integral for obtaining electron densities
                     % Nc = conduction band density of states
                     % Ec = conduction band energy
                     % Ef = Fermi level
                     % T = temperature
                     % See Schubert 2015, pp. 130
+
                     n = zeros(1, length(Nc));
-                    for i=1:length(Nc)
-                        if isnan(Nc(i)) == 0    % ignores interfaces
+
+                    for i = 1 : length(Nc)
+                        if isnan(Nc(i)) == 0 % ignores interfaces
+
                             fn = @(E) ((E/kT).^0.5)./(1 + exp((E-Efn(i)+Ec(i))/kT));
-                            n(i) = real(((2*Nc(i))/(kT*pi^0.5))*integral(fn, 0, distro_fun.uplimit));
+                            n(i) = real(((2 * Nc(i))/(kT * pi^0.5)) * integral(fn, 0, distro_fun.uplimit));
                         end
                     end
                     
                 case 'Blakemore'
+
                     eta_n = (Efn-Ec)./kT;
                     n = Nc.*(1./(exp(-eta_n) + par.gamma));
                     
-                case 'Boltz'
-                    n = Nc.*exp((Efn-Ec)./kT);
+                case 'Boltz' % Boltzmann approximation is used in the this study (RPP based memristor)
+
+                    % Nc, conduction band density of states (comes from effective mass and Planck's const)
+                    % Efn, electron quasi fermi level
+                    % Ec, conduction band energy
+
+                    n = Nc .* exp((Efn - Ec)./kT);
             end
             
         end
         
         function p = pfun(Nv, Ev, Efp, par)
-            kT = par.kB*par.T;
+
+            kT = par.kB * par.T;
             
             switch par.prob_distro_function
+
                 case 'Fermi'
+
                     % Fermi dirac integral for obtaining electron densities
                     % Nc = conduction band density of states
                     % Ec = conduction band energy
                     % Ef = Fermi level
                     % T = temperature
                     % See Schubert 2015, pp. 130
+
                     p = zeros(1, length(Nv));
+
                     % Reflecting the energy makes the integral easier for some
                     % reason- doesn't seem to like integrating from negative
                     % infinitiy...
+
                     Efp = Ev-(Efp-Ev);
                     
                     for i=1:length(Nv)
@@ -75,11 +89,13 @@ classdef distro_fun
                     end
                     
                 case 'Blakemore'
+
                     eta_p = (Ev - Efp)./kT;
-                    p = Nv.*(1./(exp(-eta_p) + par.gamma));
+                    p = Nv .* (1./(exp(-eta_p) + par.gamma));
                     
                 case 'Boltz'
-                    p = Nv.*exp((Ev-Efp)./kT);
+
+                    p = Nv .* exp((Ev - Efp)./kT);
             end
             
         end

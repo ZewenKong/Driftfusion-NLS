@@ -7,15 +7,7 @@ function sol_ic = extract_IC(sol, requested_time)
 % calculated from the SOL parameters and REQUESTED_TIME.
 % Update 02/09/21 REQUESTED_TIME can now be a 2 element vector [START_TIME,
 % END_TIME]
-%% LICENSE
-% Copyright (C) 2020  Philip Calado, Ilario Gelmetti, and Piers R. F. Barnes
-% Imperial College London
-% This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU Affero General Public License as published
-% by the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-%
-% START CODE
+
 if length(requested_time) == 1
     index = 0;
     index = find(sol.t <= requested_time);
@@ -28,12 +20,19 @@ elseif length(requested_time) == 2
     index(2) = index_temp2(end);
 end
 
+% disp('----- DEBUG extract_IC -----');
+% disp(['size(sol.u)      = [' num2str(size(sol.u)) ']']);
+% disp(['length(sol.t)    = ' num2str(length(sol.t))]);
+% disp(['requested_time   = [' num2str(requested_time) ']']);
+% disp(['computed index   = [' num2str(index) ']']);
+
 sol_ic = sol;
-sol_ic.u = sol.u(index, :, :);
+sol_ic.u = sol.u(index, :, :); % error
 
 % Overwrite Vapp
 Vappt = dfana.calcVapp(sol);
 sol_ic.par.V_fun_arg(1) = Vappt(index(end));
+
 % Overwrite time array
 sol_ic.t = sol.t(index);
 

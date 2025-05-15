@@ -80,34 +80,26 @@ classdef dfana
 
         end
 
-        function [J, j, x] = calcJ(sol, mesh_option)
+        function [J, j, x] = calcJ(sol)
             % Current, J and flux, j calculation from continuity equations
             % obtain SOL components for easy referencing
-            [u,t,x_whole,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
+            [u,t,xmesh,par,dev,n,p,a,c,V] = dfana.splitsol(sol);
 
-            switch mesh_option
-                case "whole"
-                    x = x_whole;
-                    eppM = par.dev.epp;
-                case "sub"
-                    x = par.x_sub;
-                    n = getvar_sub(n);
-                    p = getvar_sub(p);
-                    a = getvar_sub(a);
-                    c = getvar_sub(c);
-                    eppM = par.dev_sub.epp;
-            end
+            n_sub = getvar_sub(n);
+            p_sub = getvar_sub(p);
+            a_sub = getvar_sub(a);
+            c_sub = getvar_sub(c);
 
             x = par.x_sub;
             [~,~,g] = dfana.calcg(sol);
 
-            [~, dndt] = gradient(n, x, t);
-            [~, dpdt] = gradient(p, x, t);
-            [~, dadt] = gradient(a, x, t);
-            [~, dcdt] = gradient(c, x, t);
+            [~, dndt] = gradient(n_sub, x, t);
+            [~, dpdt] = gradient(p_sub, x, t);
+            [~, dadt] = gradient(a_sub, x, t);
+            [~, dcdt] = gradient(c_sub, x, t);
 
             % Recombination
-            r = dfana.calcr(sol, mesh_option);
+            r = dfana.calcr(sol, "sub");
 
             djndx = -dndt + g - r.tot;
             djpdx = -dpdt + g - r.tot;
@@ -173,10 +165,10 @@ classdef dfana
             j.a = par.mobseti*par.K_a*j.a;
 
             % displacement flux
-            FV = dfana.calcF(sol, "sub");
+            FV_sub = dfana.calcF(sol, "sub");
 
-            [~, FV_dt] = gradient(FV, x, t);
-            j.disp = par.epp0.*eppM.*FV_dt;
+            [~, FV_sub_dt] = gradient(FV_sub, x, t);
+            j.disp = par.epp0.*par.dev_sub.epp.*FV_sub_dt;
 
             J.n = j.n*-par.e;
             J.p = j.p*par.e;
@@ -208,21 +200,21 @@ classdef dfana
             end
             g = g1 + g2;
         end
-
+        
         function Pin = calcPin(sol)
             % Incident optical power density
-            % Note this integrates across the available spectrum
-            % within AM15.xls
+            % Note this integrates across the available spectrum 
+            % within AM15.xls 
             if strcmp(sol.par.optical_model, 'Beer-Lambert')
-                AM15_data = xlsread('AM15.xls');
-                Pin = 1e-3*trapz(AM15_data(:,1), AM15_data(:,2));
+                AM15_data = readtable('AM15.xls', 'VariableNamingRule', 'preserve');
+                Pin = 1e-3*trapz(AM15_data.(1), AM15_data.(2));
             else
                 warning('No incident photon spectrum available, assuming Pin = 0.1 W cm-2')
                 Pin = 0.1;
             end
         end
 
-
+        
         function [r, ns, ps, alpha_xn, beta_xp] = calcr(sol, mesh_option)
             % Calculate the recombination rate on i-half mesh
             % obtain SOL components for easy referencing
@@ -268,12 +260,75 @@ classdef dfana
             % Volumetric surface SRH
             ns = n.*exp(-alpha_xn.*xprime_n); % Projected electron surface density
             ps = p.*exp(-beta_xp.*xprime_p);  % Projected hole surface density
-            r.vsr = vsr_zone.*(ns.*ps - dev.ni.^2)...
+            r.vsr = vsr_zone.*(ns.*ps - dev.nt.*dev.pt)...
                 ./(dev.taun_vsr.*(ps + dev.pt) + dev.taup_vsr.*(ns + dev.nt));
+            % System boundary surface recombination i.e. minority carrier
+            % currents
+            
             % Total
             r.tot = r.btb + r.srh + r.vsr;
+            
         end
+        
+        function j_surf_rec = calcj_surf_rec(sol)
+            % Calculates the absolute surface recombination flux for system
+            % boundaries.
+            [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
+            
+            %% Absolute fluxes at the boundaries
+            [~, j, ~] = dfana.calcJ(sol);
+            jn_l = abs(j.n(:,1));
+            jn_r = abs(j.n(:,end));
 
+            jp_l = abs(j.p(:,1));
+            jp_r = abs(j.p(:,end));
+            
+            j_surf_rec.n_l = zeros(1, length(t));
+            j_surf_rec.p_l = zeros(1, length(t));
+            j_surf_rec.n_r = zeros(1, length(t));
+            j_surf_rec.p_r = zeros(1, length(t));
+            
+            if par.p0_l == par.n0_l && par.n0_r == par.p0_r
+                % Intrinsic both sides then can be either?
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jn_r;
+            elseif par.p0_l >= par.n0_l && par.n0_r >= par.p0_r
+                % p-type left boundary, n-type right boundary
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jp_r;
+            elseif par.n0_l >= par.n0_r && par.p0_r >= par.n0_r
+                % n-type left boundary, p-type right boundary
+                j_surf_rec.l = jp_l;
+                j_surf_rec.r = jn_r;
+            elseif par.p0_l >= par.n0_l && par.p0_r >= par.n0_r
+                j_surf_rec.l = jn_l;
+                j_surf_rec.r = jn_r;   
+            elseif par.n0_l >= par.p0_l && par.n0_r >= par.p0_r
+                % p-type both boundaries or n-type both boundaries
+                j_surf_rec.l = jp_l;
+                j_surf_rec.r = jp_r;  
+            end
+            j_surf_rec.tot = j_surf_rec.l + j_surf_rec.r;
+        end
+        
+        function j_surf_rec = calcj_surf_rec_lucy(sol)
+            [u,t,x_input,par,~,n,p,a,c,V] = dfana.splitsol(sol);
+            [~, j, ~] = dfana.calcJ(sol);
+            
+            jn_l = j.n(:,1);
+            jn_r = j.n(:,end);
+
+            jp_l = j.p(:,1);
+            jp_r = j.p(:,end);
+            
+            for i = 1:length(t)
+            j_surf_rec.l(i) = jn_l(i);
+            j_surf_rec.r(i) = jp_r(i);
+            j_surf_rec.tot(i) = abs(j_surf_rec.l(i))+abs(j_surf_rec.r(i));%+2*j_gen(1);               
+            end
+            
+        end
+        
         function [Jdd, jdd, xout] = calcJdd(sol)
             % Calculates drift and diffusion currents at every point and all times -
             % NOTE: UNRELIABLE FOR TOTAL CURRENT as errors in the calculation of the
@@ -410,7 +465,7 @@ classdef dfana
             end
 
             for i=1:length(t)
-                [~, dVdx(i,:)] = pdeval(0, x_whole, V(i,:),x);
+                [~, dVdx(i,:)] = pdeval(0,x_whole,V(i,:),x);
             end
             FV = -dVdx;
 
@@ -444,7 +499,7 @@ classdef dfana
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
             % charge density
-            rho = -n + p - NA + ND + par.z_a*a + par.z_c*c - par.z_c*Nani - par.z_c*Ncat;
+            rho = -n + p - NA + ND + par.z_a*a + par.z_c*c - par.z_a*Nani - par.z_c*Ncat;
         end
 
         function Vapp = calcVapp(sol)
@@ -465,7 +520,7 @@ classdef dfana
                 if isfield(JVsol.ill, 'f')
                     Vapp = dfana.calcVapp(JVsol.ill.f);
                     Vapp = Vapp';
-                    J = dfana.calcJ(JVsol.ill.f, "sub");
+                    J = dfana.calcJ(JVsol.ill.f);
                     try
                         stats.Jsc_f = interp1(Vapp, J.tot(:, end), 0);
                     catch
@@ -500,7 +555,7 @@ classdef dfana
                 if isfield(JVsol.ill, 'r')
                     Vapp = dfana.calcVapp(JVsol.ill.r);
                     Vapp = Vapp';
-                    J = dfana.calcJ(JVsol.ill.r, "sub");
+                    J = dfana.calcJ(JVsol.ill.r);
                     try
                         stats.Jsc_r = interp1(Vapp, J.tot(:, end), 0);
                     catch

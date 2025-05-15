@@ -1,4 +1,5 @@
 function devprop = build_property(property, xmesh, par, interface_switch, gradient_property)
+
 % Builds the device property - i.e. defines the properties at
 % every x position in the device
 % PROPERTY          - the variable name of the propery e.g. par.Phi_EA
@@ -17,13 +18,14 @@ function devprop = build_property(property, xmesh, par, interface_switch, gradie
 % it under the terms of the GNU Affero General Public License as published
 % by the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
-%
-%% Start code
+
+%% - - - - - - - - - - CODE START - - - - - - - - - -
+
 devprop = zeros(1, length(xmesh));
 
-for i=1:length(par.dcum)                % i is the layer index
-    for j = 1:length(xmesh)             % j is the spatial mesh point index
-        if any(strcmp(par.layer_type{1,i}, {'layer', 'active'})) == 1
+for i = 1 : length(par.dcum) % i is the layer index
+    for j = 1 : length(xmesh) % j is the spatial mesh point index
+        if any(strcmp(par.layer_type{1, i}, {'layer', 'active'})) == 1
             if i == 1
                 condition = (xmesh(j) >= par.dcum0(i));
             else
@@ -37,28 +39,30 @@ for i=1:length(par.dcum)                % i is the layer index
                     devprop(j) = property(i);
                 end
             end
-        elseif any(strcmp(par.layer_type{1,i}, {'junction', 'interface'})) == 1
-            
+
+        elseif any(strcmp(par.layer_type{1, i}, {'junction', 'interface'})) == 1
             if xmesh(j) >= par.dcum0(i)
-                xprime = xmesh(j)-par.dcum0(i);
+                xprime = xmesh(j) - par.dcum0(i);
                 deff = par.d(i);
+
                 % Gradient coefficient for surface recombination equivalence
-                alpha0 = ((par.Phi_EA(i-1) - par.Phi_EA(i+1))/(par.kB*par.T) + (log(par.Nc(i+1))-log(par.Nc(i-1))))/deff;
+                alpha0 = ((par.Phi_EA(i - 1) - par.Phi_EA(i + 1)) / (par.kB * par.T) + (log(par.Nc(i + 1)) - log(par.Nc(i - 1)))) / deff;
                 if alpha0 < 0
                     xprime_n = xprime;
-                    alpha0_xn = alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                    alpha0_xn = alpha0; % the sign of alpha0 is referenced to the direction of xprime_n
                 else
                     xprime_n = deff-xprime;
-                    alpha0_xn = -alpha0;     % the sign of alpha0 is referenced to the direction of xprime_n
+                    alpha0_xn = -alpha0; % the sign of alpha0 is referenced to the direction of xprime_n
                 end
+
                 % Gradient coefficient for surface recombination equivalence
-                beta0 = ((par.Phi_IP(i+1) - par.Phi_IP(i-1))/(par.kB*par.T) + (log(par.Nv(i+1))-log(par.Nv(i-1))))/deff;
+                beta0 = ((par.Phi_IP(i + 1) - par.Phi_IP(i - 1)) / (par.kB * par.T) + (log(par.Nv(i + 1)) - log(par.Nv(i - 1)))) / deff;
                 if beta0 < 0
                     xprime_p = xprime;
-                    beta0_xp = beta0;        % the sign of beta is referenced to the direction of xprime_p
+                    beta0_xp = beta0; % the sign of beta is referenced to the direction of xprime_p
                 else
                     xprime_p = deff-xprime;  
-                    beta0_xp = -beta0;       % the sign of beta is referenced to the direction of xprime_p
+                    beta0_xp = -beta0; % the sign of beta is referenced to the direction of xprime_p
                 end
                 
                 switch interface_switch
@@ -67,14 +71,14 @@ for i=1:length(par.dcum)                % i is the layer index
                     case 'constant'
                         devprop(j) = property(i);
                     case 'lin_graded'
-                        gradient = (property(i+1)-property(i-1))/deff;
+                        gradient = (property(i + 1) - property(i - 1)) / deff;
                         if gradient_property == 1
                             devprop(j) = gradient;
                         else
-                            devprop(j) = property(i-1) + xprime*gradient;
+                            devprop(j) = property(i - 1) + xprime*gradient;
                         end
                     case 'exp_graded'
-                        log_gradient = (log(property(i+1))-log(property(i-1)))/deff;
+                        log_gradient = (log(property(i + 1))-log(property(i - 1))) / deff;
                         if gradient_property == 1
                             devprop(j) = property(i-1)*log_gradient*exp(log_gradient*xprime);
                         else

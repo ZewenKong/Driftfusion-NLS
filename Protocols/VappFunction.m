@@ -1,4 +1,5 @@
 function sol = VappFunction(sol_ini, Vapp_func, Vapp_coeff, tmax, tpoints, logtime)
+% 
 % Applies a voltage function using the initial conditions defined by
 % SOL_INI
 % Input arguments:
@@ -10,7 +11,7 @@ function sol = VappFunction(sol_ini, Vapp_func, Vapp_coeff, tmax, tpoints, logti
 % TPOINTS   = Number of solution time points (must be >=2 points
 % LOGTIME   = 0 = linear time mesh, 1 = log time mesh.
 %
-%% LICENSE
+% LICENSE
 % Copyright (C) 2020  Philip Calado, Ilario Gelmetti, and Piers R. F. Barnes
 % Imperial College London
 % This program is free software: you can redistribute it and/or modify
@@ -18,7 +19,8 @@ function sol = VappFunction(sol_ini, Vapp_func, Vapp_coeff, tmax, tpoints, logti
 % by the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
 % 
-%% Start code
+%% - - - - - - - - - - CODE START - - - - - - - - - -
+
 par = sol_ini.par;
 par.V_fun_type = Vapp_func;
 par.tmax = tmax;
@@ -33,6 +35,7 @@ else
     par.t0 = 0;
 end
 
-sol = df(sol_ini, par);
+% sol = df(sol_ini, par);
+sol = dfionic(sol_ini, par);
 
 end

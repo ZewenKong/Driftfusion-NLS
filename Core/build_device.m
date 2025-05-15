@@ -43,9 +43,14 @@ dev.Ncat = build_property(par.Ncat, xmesh, par, 'exp_graded', 0);
 dev.a_max = build_property(par.a_max, xmesh, par, 'exp_graded', 0);
 dev.c_max = build_property(par.c_max, xmesh, par, 'exp_graded', 0);
 
-% Properties that are zeroed in the interfaces
+% - - - - - - - - - - Properties that are zeroed in the interfaces
+
 dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
-dev.B = build_property(par.B, xmesh, par, 'zeroed', 0);
+dev.B = build_property(par.B, xmesh, par, 'zeroed', 0); % build the device, B
+
+Bionic_arr = [0, 0, 0, 5e-5, 0]; % * only 4th layer (interface between RPP and PCBM)
+dev.Bionic = build_property(Bionic_arr, xmesh, par, 'constant', 0);
+
 dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
 dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
 
@@ -64,9 +69,15 @@ dev.alpha0_xn = build_property(0, xmesh, par, 'alpha0_xn', 1);
 dev.beta0_xp = build_property(0, xmesh, par, 'beta0_xp', 1);
 dev.dint = build_property(0, xmesh, par, 'dint', 1);
 
-% Switches
+% - - - - - - - - - - Switches
+
+% property vriable name is 0,
+% `init_switch`, at interface = 1, at layer = 0;
+% `bulk_switch`, at interface = 0, at lyaer = 1;
+
 dev.int_switch = build_property(0, xmesh, par, 'int_switch', 1);
-dev.bulk_switch = abs(dev.int_switch-1);
+dev.bulk_switch = abs(dev.int_switch - 1);
+
 if par.vsr_mode
     dev.vsr_zone = build_property(0, xmesh, par, 'vsr_zone', 1);
     dev.srh_zone = dev.bulk_switch;

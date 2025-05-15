@@ -88,7 +88,7 @@ for i = 1:length(sol_matrix(1, 1, :))
     if stable
         %display(['variable ', num2str(i), ' stabilisation verified']);        
     else
-        warning('Driftfusion:verifyStabilization',...
+        warning('Driftfusion: verifyStabilization',...
             'Comparing final solutions at %s s and %s s showed that the %s distribution did not reach stability. Consider trying with a greater tmax.',...
             num2str(t_array(time_index)), num2str(t_array(end)), names(i));
     end
@@ -97,7 +97,8 @@ for i = 1:length(sol_matrix(1, 1, :))
 end
 
 if all_stable
-    disp("Stabilisation verified");
+    disp("verifyStabilization: stabilisation verified");
+    disp('-');
 end
 
 %------------- END OF CODE --------------
