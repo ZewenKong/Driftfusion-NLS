@@ -4,8 +4,9 @@
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
 % - - - - - - - - - - data inputs
-input = 'Input_files_zk/peapi.csv';
-scan_rts = logspace(-2, 2, 5);
+input = 'Input_files/peapi_v2.csv';
+% scan_rts = logspace(-2, 2, 5);
+scan_rts = [5, 6, 7, 8, 9, 10];
 
 par = pc(input); 
 par.prob_distro_function = 'Boltz'; 
@@ -19,7 +20,7 @@ sols = cell(1, length(scan_rts)); % solutions cell array
 %% - - - - - - - - - - DATA PROCESSING - - - - - - - - - -
 
 for i = 1 : length(scan_rts)
-    sol = doCV(soleq.ion, 0, 0, 2, -2, scan_rts(i), 1, 500); % solution
+    sol = doCV(soleq.ion, 0, 0, -1, 1, scan_rts(i), 1, 500); % solution
     sols{i} = sol;
 end
 

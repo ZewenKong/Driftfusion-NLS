@@ -48,7 +48,7 @@ function dev = build_device(par, meshoption)
     dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
     dev.B = build_property(par.B, xmesh, par, 'zeroed', 0); % build the device, B
 
-    Bionic_arr = [0, 0, 0, 1e-5, 0]; % * only 4th layer (interface between RPP and PCBM)
+    Bionic_arr = [0, 0, 0, 1e-15, 0]; % * only 4th layer (interface between RPP and PCBM)
     dev.Bionic = build_property(Bionic_arr, xmesh, par, 'constant', 0);
 
     dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);

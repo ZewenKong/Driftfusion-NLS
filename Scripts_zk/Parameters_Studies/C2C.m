@@ -1,4 +1,3 @@
-
 % Cycle-to-cycle (C2C) JV measurement,
 % to define the endurance and the stochasticity
 
@@ -10,7 +9,6 @@ initialise_df;
 
 % - - - - - - - - - - read in data files
 input = 'Input_files/peapi_v2.csv';
-% input = 'Input_files_zk/peapi_layered.csv';
 
 par = pc(input); % original parameters
 par.tmesh_type = 'linear'; % log10
@@ -22,7 +20,10 @@ cycle = 1; % cycle value
 
 %% - - - - - - - - - - DO MEASUREMENT  - - - - - - - - - -
 
-sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 1000); % solution
+% sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500); % solution
+
+sol = doJV(soleq.ion, 1e-1, 500, 0, 1, -1, 1, 0);
+% function JVsol = doJV(sol_ini, JVscan_rate, JVscan_pnts, Intensity, mobseti, Vstart, Vend, option)
 
 xmesh = sol.x; xpos = 0;
 ppos = getpointpos(xpos, xmesh);
@@ -44,17 +45,22 @@ legend_handle = [];
 legend_label = cell(1, cycle);
 on_off_ratio_handle = cell(1, cycle); % ON/OFF ratio cell array (handle)
 
-for i = 1 : cycle
+for i = 1:cycle
 
     % round (), make sure idx is an integer
     % (1 : data_pnts_per_cyc), current data points array
     % e.g., round((1 - 1) * (data_pnts_per_cyc), 1st Cycle starts from 0
     %       round((2 - 1) * (data_pnts_per_cyc), 2nd Cycle starts after 1st Cycle
 
-    cycle_idx = round(round(i - 1) * (data_pnts_per_cyc) + (1 : data_pnts_per_cyc));
+    cycle_idx = round(round(i - 1) * (data_pnts_per_cyc) + (1:data_pnts_per_cyc));
 
     % - - - - - - - - - - J - V Plot
     plots = plot(Vapp(cycle_idx), J.tot(cycle_idx, ppos), 'LineWidth', 0.75);
+
+    % plots = scatter(Vapp(cycle_idx), J.tot(cycle_idx, ppos), ...
+    %     16, ... % marker size (in points²)
+    %     'MarkerEdgeColor', 'k', ... % optional: edge color
+    %     'LineWidth', 0.15); % edge‐line width
 
     legend_handle = [legend_handle, plots];
     legend_label{i} = ['C' num2str(i)];
@@ -71,7 +77,7 @@ for i = 1 : cycle
     % - - - - - - - - - - define SET/RESET range
     V_sweep_dirc = [0; diff(V_temp)];
     SET_V_range = (V_temp > 0) & (V_sweep_dirc > 0);
-    RESET_V_range = (V_temp < 0) & (V_sweep_dirc < 0); 
+    RESET_V_range = (V_temp < 0) & (V_sweep_dirc < 0);
 
     % - - - - - - - - - - find the max gradient in SET range
     [max_slope_in_SET, idx_in_SET] = max(dJdV(SET_V_range));
@@ -129,6 +135,7 @@ for i = 1 : cycle
     % scatter(V_read_out, J_read_out_bwd, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.75);
     % plot([V_read_out, V_read_out], [J_read_out_fwd, J_read_out_bwd], '--', 'LineWidth', 0.75);
 end
+
 hold off;
 box on;
 
