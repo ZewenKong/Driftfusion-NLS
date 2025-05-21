@@ -9,7 +9,8 @@ initialise_df;
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
 % - - - - - - - - - - read in data files
-input = 'Input_files_zk/peapi.csv';
+input = 'Input_files/peapi_v2.csv';
+% input = 'Input_files_zk/peapi_layered.csv';
 
 par = pc(input); % original parameters
 par.tmesh_type = 'linear'; % log10
@@ -19,9 +20,9 @@ par = refresh_device(par); % refresh the device
 soleq = equilibrate(par);
 cycle = 1; % cycle value
 
-%% - - - - - - - - - - DO MEASUREMENT - - - - - - - - - -
+%% - - - - - - - - - - DO MEASUREMENT  - - - - - - - - - -
 
-sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500); % solution
+sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 1000); % solution
 
 xmesh = sol.x; xpos = 0;
 ppos = getpointpos(xpos, xmesh);
@@ -87,8 +88,8 @@ for i = 1 : cycle
     J_RESET = J_temp_in_RESET(idx_in_RESET);
 
     % - - - - - - - - - - plot the SET/RESET points for each cycle
-    scatter(V_SET, J_SET, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 1);
-    scatter(V_RESET, J_RESET, 50, 'bx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.5);
+    % scatter(V_SET, J_SET, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 1);
+    % scatter(V_RESET, J_RESET, 50, 'bx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.5);
 
     % - - - - - - - - - - calculate the ON/OFF ratio
     V_temp = Vapp(cycle_idx);
@@ -111,8 +112,8 @@ for i = 1 : cycle
     [~, J_read_out_idx_bwd] = min(abs(V_temp(SET_bwd) - V_read_out));
     J_read_out_bwd = J_SET_bwd(J_read_out_idx_bwd);
 
-    disp(['C2C.m: current values at V (fwd) = ', num2str(V_read_out), ' V: ', num2str(J_read_out_fwd)]);
-    disp(['C2C.m: current values at V (bwd) = ', num2str(V_read_out), ' V: ', num2str(J_read_out_bwd)]);
+    % disp(['C2C.m: current values at V (fwd) = ', num2str(V_read_out), ' V: ', num2str(J_read_out_fwd)]);
+    % disp(['C2C.m: current values at V (bwd) = ', num2str(V_read_out), ' V: ', num2str(J_read_out_bwd)]);
 
     resistance_HRS = V_read_out / abs(J_read_out_bwd);
     resistance_LRS = V_read_out / abs(J_read_out_fwd);
@@ -124,9 +125,9 @@ for i = 1 : cycle
     disp(['C2C.m: ON/OFF ratio: ', num2str(on_off_ratio)]);
 
     % - - - - - - - - - - plot
-    scatter(V_read_out, J_read_out_fwd, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.75);
-    scatter(V_read_out, J_read_out_bwd, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.75);
-    plot([V_read_out, V_read_out], [J_read_out_fwd, J_read_out_bwd], '--', 'LineWidth', 0.75);
+    % scatter(V_read_out, J_read_out_fwd, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.75);
+    % scatter(V_read_out, J_read_out_bwd, 50, 'rx', 'MarkerEdgeColor', 'k', 'LineWidth', 0.75);
+    % plot([V_read_out, V_read_out], [J_read_out_fwd, J_read_out_bwd], '--', 'LineWidth', 0.75);
 end
 hold off;
 box on;
