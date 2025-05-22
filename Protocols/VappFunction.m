@@ -22,7 +22,7 @@ function sol = VappFunction(sol_ini, Vapp_func, Vapp_coeff, tmax, tpoints, logti
     %% - - - - - - - - - - CODE START - - - - - - - - - -
 
     par = sol_ini.par;
-    par.V_fun_type = c;
+    par.V_fun_type = Vapp_func;
     par.tmax = tmax;
     par.tpoints = tpoints;
     par.V_fun_arg = Vapp_coeff;

@@ -11,7 +11,8 @@ initialise_df;
 input = 'Input_files/peapi_v2.csv';
 
 par = pc(input); % original parameters
-par.tmesh_type = 'linear'; % log10
+% par.tmesh_type = 'linear'; % log10
+par.tmesh_type = 'log10';
 
 par = refresh_device(par); % refresh the device
 
@@ -20,10 +21,7 @@ cycle = 1; % cycle value
 
 %% - - - - - - - - - - DO MEASUREMENT  - - - - - - - - - -
 
-% sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500); % solution
-
-sol = doJV(soleq.ion, 1e-1, 500, 0, 1, -1, 1, 0);
-% function JVsol = doJV(sol_ini, JVscan_rate, JVscan_pnts, Intensity, mobseti, Vstart, Vend, option)
+sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500); % solution
 
 xmesh = sol.x; xpos = 0;
 ppos = getpointpos(xpos, xmesh);
