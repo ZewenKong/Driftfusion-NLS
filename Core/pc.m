@@ -16,6 +16,10 @@ classdef pc
     % by the Free Software Foundation, either version 3 of the License, or
     % (at your option) any later version.
     %
+    % Edited:
+    % - - - - - - - - - - recombination
+    % B_ionic = [0, 0, 0, 1e-15, 0];
+    %
     %% - - - - - - - - - - CODE START - - - - - - - - - -
 
     properties (Constant)
@@ -140,7 +144,7 @@ classdef pc
         side = 'left'; % illumination side 1 = left, 2 = right
 
         % - - - - - - - - - - pulse settings
-        pulsepow = 10; % Pulse power [mW cm-2] OM2 (Beer-Lambert and Transfer Matrix only)
+        pulsepow = 10; % pulse power [mW cm-2] OM2 (Beer-Lambert and Transfer Matrix only)
 
         %% - - - - - - - - - - LAYER MATERIAL PROPERTIES - - - - - - - - - -
 
@@ -217,6 +221,7 @@ classdef pc
         % radiative recombination, r_rad = k(np - ni^2)
         %
         B = [3.6e-12]; % radiative recombination coefficient [cm3 s-1]
+        B_ionic = [0, 0, 0, 1e-15, 0];
 
         % - - - - - - - - - - SRH time constants for each layer [s]
         taun = [1e6]; % SRH time constant for electrons [s]

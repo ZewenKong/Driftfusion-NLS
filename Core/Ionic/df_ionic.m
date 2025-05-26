@@ -1,23 +1,22 @@
-function solstruct = df(varargin)
+function solstruct = df_ionic(varargin)
     %
-    % The core DRIFTFUSION function organises properties and inputs for pdepe,
-    % a routine to test solving the diffusion and drift equations using the matlab pepde solver.
-    %
-    % Solution outputs
-    % V = u(1) = electrostatic potential
-    % n = u(2) = electron density
-    % p = u(3) = holes density
-    % c = u(4) = cation density (optional)
-    % a = u(5) = anion density (optional)
+    % Adapted from the df.m file,
+    % perform the Nernst and Butler-Volmer calculation,
+    % to simulate the ionic flux in Driftfusion.
     %
     %% - - - - - - - - - - CODE START - - - - - - - - - -
 
-    if length(varargin) == 0 % If no input parameter set then call pc directly
+    % - - - - - - - - - - clear the calcdata generated in equilibrate.m
+    global calc;
+    clear calc;
+    dfana_ionic.save_calcdata('reset');
+
+    if length(varargin) == 0
 
         par = pc;
         dficAnalytical = true;
 
-    elseif length(varargin) == 1 % if one input argument then assume it is the Initial Conditions (IC) solution
+    elseif length(varargin) == 1
 
         icsol = varargin{1, 1}.u;
         icx = varargin{1, 1}.x;
@@ -26,12 +25,12 @@ function solstruct = df(varargin)
 
     elseif length(varargin) == 2
 
-        if max(max(max(varargin{1, 1}.u))) == 0 % if sol == 0,'initial solution w/ zero mobility' in 'equilibrate.m'
+        if max(max(max(varargin{1, 1}.u))) == 0
 
             par = varargin{2};
             dficAnalytical = true;
 
-        elseif isa(varargin{2}, 'char') == 1 % checks to see if argument is a character
+        elseif isa(varargin{2}, 'char') == 1
 
             input_solstruct = varargin{1, 1};
             icsol = input_solstruct.u;
@@ -39,7 +38,7 @@ function solstruct = df(varargin)
             par = input_solstruct.par;
             dficAnalytical = false;
 
-        else % 'initial solution w/ mobility' and 'initial solution w/ ion mobility' in 'equilibrate.m'
+        else
 
             input_solstruct = varargin{1, 1};
             icsol = input_solstruct.u;
@@ -54,20 +53,33 @@ function solstruct = df(varargin)
     %% - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
     % - - - - - - - - - - physics constants
-    kB = par.kB; q = par.q; e = par.e; epp0 = par.epp0; T = par.T;
+    kB = par.kB;
+    q = par.q;
+    e = par.e;
+    epp0 = par.epp0;
+    T = par.T;
+
+    % - - - - - - - - - - nernst & butler-volmer constants
+    E_st = par.E_st; % standard potential for (Ag + I- <--> AgI + e-, 0.152 eV)
+    E_hyd = par.E_hyd; % standard hydrogen electrode (SHE)
+    R = par.R; % universal gas constant
+    F = par.F; % Faraday constant
+    z = par.z; % no. of electrons involved in the electrode reaction
+    j0 = par.j0; % exchange current density
+    alpha_e = par.alpha_c; % electrode charge transfer coefficient
 
     % - - - - - - - - - - spatial mesh
-    % xmesh, the spatial mesh
-    % xx, thickness of the device (without electrode), distribute in number of layer_points
-    xmesh = par.xx;
-    % x_sub, thickness of the device (without electrode,
-    % not start from zero), distribute in number of layer_points
-    x_sub = par.x_sub;
+    xmesh = par.xx; % spatial mesh, thickness of the device
+    x_sub = par.x_sub; % spatial mesh (not start from 0)
     x = xmesh;
 
     % - - - - - - - - - - time mesh
-    % meshgen_t, core function which is used to generate time mesh (t)
+    % - - - - - - - - - - original ver.
     t = meshgen_t(par);
+    %
+    % - - - - - - - - - - update ver. (increase time points (for fast pde convergence))
+    % t = meshgen_t(par);
+    % par.tpoints = max(1000, par.tpoints * 5);
 
     % - - - - - - - - - - dependent properties
     Vbi = par.Vbi; % built-in voltage
@@ -75,20 +87,20 @@ function solstruct = df(varargin)
     p0_l = par.p0_l; p0_r = par.p0_r; % equilibrium hole density
 
     % - - - - - - - - - - device parameters
-    N_ionic_species = par.N_ionic_species; % number of ionic species in this solution (2)
-    N_variables = par.N_ionic_species + 3; % number of variables in this solution (+3 for V, n, and p)
+    N_ionic_species = par.N_ionic_species; % no. of ionic species in this solution (2)
+    N_variables = par.N_ionic_species + 3; % no. of variables in this solution (+3 for V, n, and p)
     N_max_variables = par.N_max_variables; % maximum number of variables in this version
 
     dev = par.dev; % device parameters
-    device = par.dev_sub; % sub-device parameters
+    device = par.dev_sub; % device sub parameters
 
-    % - - - - - - - - - - charge carriers mobilities
+    % - - - - - - - - - - charge parameters
     mu_n = device.mu_n; % electron mobility
     mu_p = device.mu_p; % hole mobility
-    mu_c = device.mu_c; % cation mobility (e.g. 1e-8 in active layer, define from .csv file)
-    mu_a = device.mu_a; % anion mobility (e.g. 1e-7 in active layer)
+    mu_c = device.mu_c; % cation mobility
+    mu_a = device.mu_a; % anion mobility
 
-    Nc = device.Nc; % conduction band effective density of states (eDOS)
+    Nc = device.Nc; % conduction band eDOS
     Nv = device.Nv; % valence band eDOS
 
     c_max = device.c_max; % cation density upper limit
@@ -106,8 +118,8 @@ function solstruct = df(varargin)
 
     taun = device.taun; % electron SRH time constant
     taup = device.taup; % hole SRH time constant
-    taun_vsr = device.taun_vsr; % electron SRH time constant - volumetric interfacial surface recombination scheme
-    taup_vsr = device.taup_vsr; % hole SRH time constant - volumetric interfacial surface recombination scheme
+    taun_vsr = device.taun_vsr; % electron SRH time constant
+    taup_vsr = device.taup_vsr; % hole SRH time constant
 
     nt = device.nt; % SRH electron trap constant
     pt = device.pt; % SRH hole trap constant
@@ -118,13 +130,16 @@ function solstruct = df(varargin)
     switch N_ionic_species
 
         case 0 % Nani, Ncat, a, and c set to zero for Poisson
-            Ncat = zeros(1, length(x_sub)); Nani = zeros(1, length(x_sub));
+            Ncat = zeros(1, length(x_sub));
+            Nani = zeros(1, length(x_sub));
 
         case 1 % Nani and a both set to zero for Poisson
-            Ncat = device.Ncat; Nani = zeros(1, length(x_sub));
+            Ncat = device.Ncat;
+            Nani = zeros(1, length(x_sub));
 
         case 2
-            Ncat = device.Ncat; Nani = device.Nani;
+            Ncat = device.Ncat;
+            Nani = device.Nani;
     end
 
     xprime_n = device.xprime_n; % translated x co-ordinates for interfaces
@@ -136,7 +151,8 @@ function solstruct = df(varargin)
     alpha0_xn = device.alpha0_xn; % alpha0_xn is alpha for F = 0 reference to xprime_n
     beta0_xp = device.beta0_xp; % beta0_xp is beta for F = 0 referenced to xprime_p
 
-    z_c = par.z_c; z_a = par.z_a; % +1, -1
+    z_c = par.z_c;
+    z_a = par.z_a;
 
     n0_l = par.n0_l; n0_r = par.n0_r; % equilibrium charge (electron, hole) density
     p0_l = par.p0_l; p0_r = par.p0_r;
@@ -145,14 +161,11 @@ function solstruct = df(varargin)
     sp_l = par.sp_l; sp_r = par.sp_r;
 
     Rs = par.Rs; % series resistance
-    gamma = par.gamma; % blakemore approximation coefficient, 0 for boltzmann stats
+    gamma = par.gamma;
 
-    % - - - - - - - - - - original ver.
-    % B = device.B;
-    %
-    % - - - - - - - - - - * updated ver.
-    B = device.B; % radiative recombination rate coefficient
-    B_ionic = device.B_ionic; % * rate coefficient for ions and vacancies
+    % - - - - - - - - - - recombination (electronic & ionic)
+    B = device.B; % electronic
+    B_ionic = device.B_ionic; % ionic (build_device.m)
 
     % - - - - - - - - - - switches and accelerator coefficients
     mobset = par.mobset; % electronic carrier transport switch
@@ -171,10 +184,11 @@ function solstruct = df(varargin)
 
     %% - - - - - - - - - - GENERATION FUNCTION - - - - - - - - - -
 
-    g1_fun = fun_gen(par.g1_fun_type); % g1_fun_type, is used to control the light source time-dependence (const)
+    g1_fun = fun_gen(par.g1_fun_type); % constant
     g2_fun = fun_gen(par.g2_fun_type);
 
-    gxt1 = 0; gxt2 = 0; g = 0;
+    gxt1 = 0; gxt2 = 0;
+    g = 0;
     gx1 = par.gx1; gx2 = par.gx2; % light source 1 & 2
 
     int1 = par.int1; int2 = par.int2;
@@ -185,7 +199,7 @@ function solstruct = df(varargin)
     g1_fun_arg = par.g1_fun_arg; % 0
     g2_fun_arg = par.g2_fun_arg;
 
-    if strcmp(g1_fun_type, 'constant')
+    if strcmp(g1_fun_type, 'constant') % string comparison function
 
         % illumination type g1_fun_type and g2_fun_type convert to Boolean
         % for faster execution in PDEPE
@@ -204,7 +218,7 @@ function solstruct = df(varargin)
     gM = g1_fun(g1_fun_arg, t') * gx1 + g2_fun(g2_fun_arg, t') * gx2; % check for negative generation and deal error if present
 
     if any(any(gM < 0))
-        error('df.m: generation cannot be negative - please check your generation function and associated inputs')
+        error('dfionic.m: generation cannot be negative - please check your generation function and associated inputs')
     end
 
     % - - - - - - - - - - voltage function
@@ -230,72 +244,39 @@ function solstruct = df(varargin)
 
     %% - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
 
-    % - - - - - - - - - - latest ver.
-    % options = odeset( ...
-    %     MaxStep=par.MaxStepFactor*0.1*par.tmax, ... % limit maximum time step size during integration
-    %     RelTol=par.RelTol, ... % relative tolerance (default: 1e-3), controls acceptable relative error
-    %     AbsTol=par.AbsTol ... % absolute tolerance (default: 1e-6), controls acceptable absolute error
-    %     );
+    % - - - - - - - - - - original ver.
+    % options = odeset('MaxStep', par.MaxStepFactor*0.1*par.tmax, ... % MaxStep = limit maximum time step size during integration
+    %     'RelTol', par.RelTol, ...
+    %     'AbsTol', par.AbsTol);
     %
-    % - - - - - - - - - - * pre-R2021a ver.
-    options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ... % MaxStep = limit maximum time step size during integration
-        'RelTol', par.RelTol, ...
-        'AbsTol', par.AbsTol);
+    % - - - - - - - - - - * updated ver. (increase the tolerance limit)
+    options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ...
+        'RelTol', 1e-4, ... % increase the limit to achieve fast pde convergence
+        'AbsTol', 1e-7); % increase the limit to achieve fast pde convergence
 
     %% - - - - - - - - - - CALL SOLVER - - - - - - - - - -
-
-    % inputs with '@' are function handles to the subfunctions
-    % below for the: equation, initial conditions, boundary conditions
-    %
-    % u, the solution matrix,
-    % a 3D matrix for which the dimensions are [time, spacem variables]
-    % u icludes, V, n, p, c, a (in order)
 
     u = pdepe(par.m, @dfpde, @dfic, @dfbc, x, t, options);
 
     %% - - - - - - - - - - OUTPUTS - - - - - - - - - -
-    % solutions and meshes to structure
 
     solstruct.u = u; % save 'u' to the 'solstruct.u' structural variable
     solstruct.x = x;
     solstruct.t = t;
-    solstruct.par = par; % store parameters object
+    solstruct.par = par;
 
-    if par.vsr_mode == 1 && par.vsr_check == 1 % volumetric surface recombination error check
+    if par.vsr_mode == 1 && par.vsr_check == 1
         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
     end
 
-    % - - - - - - - - - - L.J.F.H Code
-    % if par.vsr_mode == 1 && par.vsr_check == 1
-    %     try
-    %         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
-    %     catch
-    %         % Put this here so that probgram doesn't stop for partial solutions
-    %         % but will stop if soution has failed completely (i.e., only
-    %         % available for t = 0)
-    %         if length(solstruct.u(:,1,1)) ~= 1
-    %             warning("Could not estimate recombination flux error as solution is incomplete")
-    %         else
-    %             error("Solution failed, only availabe at t = 0")
-    %         end
-    %     end
-    % end
-    % - - - - - - - - - -
-
     %% - - - - - - - - - - SUBFUNCTIONS - - - - - - - - - -
-
-    % set up partial differential equation (pdepe) (see MATLAB pdepe help for details of C,F,S),
-    % C = Time-dependence prefactor; F = Flux terms; S = Source terms;
-    % dudx is the MATLAB-created variable.
 
     function [C, F, S] = dfpde(x, t, u, dudx)
 
-        % - - - - - - - - - - reset position point
-        if x == x_sub(1) % x_sub, the device thickness array
+        if x == x_sub(1)
             i = 1;
         end
 
-        % - - - - - - - - - - generation function (illumination)
         if g1_fun_type_constant
             gxt1 = int1 * gx1(i);
         else
@@ -310,9 +291,7 @@ function solstruct = df(varargin)
 
         g = gxt1 + gxt2;
 
-        % - - - - - - - - - - unpack variables
-        u_maxvar(1:N_variables) = u; % N_variables = ionic species (ion, vacancy) + 3 (V, n, p)
-        % assign first 'N_variables' value of u and dudx to the u_maxvar and dudx_maxvar
+        u_maxvar(1:N_variables) = u;
         dudx_maxvar(1:N_variables) = dudx;
 
         V = u_maxvar(1); % 1st variable is V
@@ -321,18 +300,14 @@ function solstruct = df(varargin)
         c = u_maxvar(4);
         a = u_maxvar(5);
 
-        dVdx = dudx_maxvar(1); % dVdx, 电场的局部变化率 (dVdx, dndx, dpdx, dadx, dcdx are V, n, p, c, a 随 x 的导数)
-        dndx = dudx_maxvar(2); % dndx, dpdx, dadx, dcdx, charge carreier density 的局部变化率
+        dVdx = dudx_maxvar(1);
+        dndx = dudx_maxvar(2);
         dpdx = dudx_maxvar(3);
         dcdx = dudx_maxvar(4);
         dadx = dudx_maxvar(5);
 
-        G_n = Nc(i) / (Nc(i) - gamma * n); % diffusion enhancement prefactors (gamma = 0 for Boltz)
+        G_n = Nc(i) / (Nc(i) - gamma * n);
         G_p = Nv(i) / (Nv(i) - gamma * p);
-
-        % - - - - - - - - - - equation editor
-        % time-dependence pre-factor (pre-allocated above)
-        % time-dependence prefactor term
 
         C_V = 0;
         C_n = 1;
@@ -341,59 +316,14 @@ function solstruct = df(varargin)
         C_a = 1;
         C = [C_V; C_n; C_p; C_c; C_a];
 
-        % - - - - - - - - - - flux terms
-        %
-        % flux, 通量项(物理量在空间上传递或流动的速率)
-
         F_V = (epp(i) / epp_factor) * dVdx;
-
-        % - - - - - Note
-        % Electrons flux term
-        %
-        % First Part: 漂移 Drift
-        %
-        % mu_n, electron mobility
-        % n, electron density
-        % (-dVdx + gradEA(i)), 驱动电子运动的驱动力
-        % dVdx, 电势梯度产生的电场; gradEA(i), 电子亲和能的梯度用于修正电场
-        %
-        % Second Part: 扩散 Diffusion
-        %
-        % G_n, diffusion enhancement prefactor
-        % kB * T, thermal energy
-        % dndx, 电子密度的空间梯度
-        % 在标准的扩散模型中, 电子扩散通量通常与浓度梯度有关, 即可用 dndx 表示.
-        % But, 当导带有效态密度 Nc 在空间上不是均匀的时, 电子的浓度 n 与 Nc 之间的归一化关系（n/Nc）会发生变化.
-        % ((n/Nc(i)) * gradNc(i))) 的作用是补偿由于 Nc 非均匀变化带来的额外贡献, 梯度修正项.
-        % n/Nc(i) 表示在位置 i 处电子浓度相对于该点导带有效态密度的归一化值 (normalisation value).
-
         F_n = mu_n(i) * n * (-dVdx + gradEA(i)) + (G_n * mu_n(i) * kB * T * (dndx - ((n / Nc(i)) * gradNc(i))));
         F_p = mu_p(i) * p * (dVdx - gradIP(i)) + (G_p * mu_p(i) * kB * T * (dpdx - ((p / Nv(i)) * gradNv(i))));
-
-        % - - - - - Note
-        % Cation flux term
-        %
-        % First Part: 漂移 Drift (z_c * c * dVdx)
-        %
-        % z_c = 1, cation charge value (+1)
-        % c, cation density
-        % dVdx, 电势梯度产生的电场
-        %
-        % Second Part: 扩散 Diffusion
-        %
-        % kB * T, thermal energy
-        % dcdx, 阳离子浓度的梯度 (阳离子浓度 c 关于空间坐标 x 的梯度)
-        % (c * (dcdx/(c_max(i) - c))) 项
-        % 考虑了当阳离子浓度接近上限 c_max(i) 时, 拥挤效应的修正.
-        % 当阳离子浓度 c 增加时, 它们在空间中的排列会变得更加密集; 当浓度接近上限 c_max(i) 时, 离子之间会相互拥挤, 限制它们的自由扩散
-        % 乘以 c 可以看作是在高浓度区域中, 拥挤效应对扩散的影响更为显著.
-
         F_c = mu_c(i) * (z_c * c * dVdx + kB * T * (dcdx + (c * (dcdx / (c_max(i) - c)))));
         F_a = mu_a(i) * (z_a * a * dVdx + kB * T * (dadx + (a * (dadx / (a_max(i) - a)))));
 
         F = [F_V; mobset * F_n; mobset * F_p; mobseti * K_c * F_c; mobseti * K_a * F_a];
 
-        % - - - - - - - - - - Electron and hole recombination
         r_rad = radset * B(i) * (n * p - ni(i) ^ 2); % radiative
         r_srh = SRHset * srh_zone(i) * ((n * p - ni(i) ^ 2) / (taun(i) * (p + pt(i)) + taup(i) * (n + nt(i)))); % bulk SRH
 
@@ -405,18 +335,12 @@ function solstruct = df(varargin)
 
         r_np = r_rad + r_srh + r_vsr; % total electron and hole recombination
 
-        % - - - - - - - - - - source terms (V, n, p)
         S_V = (1 / (epp_factor * epp0)) * (-n + p - NA(i) + ND(i) + z_a * a + z_c * c - (z_a * Nani(i) + z_c * Ncat(i)));
         S_n = g - r_np;
         S_p = g - r_np;
 
-        % - - - - - - - - - - Ion and vacancy recombination
-        % - - - - - - - - - - original ver. (no ionic recombination)
-        % S_c = 0; S_a = 0;
-        %
-        % - - - - - - - - - - * updated ver. (ion Frenkel pair recombination)
-        % [V_I][I-] <-> ([I_0])^2 % equilibrium reaction at interface PMPbI/PCBM
         r_iv = radset * B_ionic(i) * (a * c - ((dev.Nani(i)) * (dev.Ncat(i)))); % radiative
+
         S_c =- r_iv;
         S_a =- r_iv;
 
@@ -429,21 +353,13 @@ function solstruct = df(varargin)
         i = i + 1;
     end
 
-    %% - - - - - - - - - - INITIAL CONDITIONS - - - - - - - - - -
-
     function u0 = dfic(x)
-
-        % dfic, driftfusion initial condition return the initial condition, u0
-        % with data type - a numeric array []
 
         if x == x_sub(1)
             i = 1;
         end
 
         if length(par.dcell) == 1 % single layer
-
-            % dcell, numeric array includes cumulative thickness
-
             u0_ana = [
                       (x / xmesh(end)) * Vbi;
                       n0_l * exp((x * (log(n0_r) - log(n0_l))) / par.dcum0(end)); % electron density, n0(x), changes with the spatial x
@@ -451,9 +367,7 @@ function solstruct = df(varargin)
                       dev.Ncat(i); % cation density
                       dev.Nani(i); % anion density
                       ];
-
-        else % multi-layered
-
+        else
             u0_ana = [
                       (x / xmesh(end)) * Vbi;
                       dev.n0(i);
@@ -463,9 +377,7 @@ function solstruct = df(varargin)
                       ];
         end
 
-        u0_ana = u0_ana(1:N_variables); % confirm the u0_ana with size of N_variables
-
-        % - - - - - - - - - - organise ICs based on number of variables and SOL_IC
+        u0_ana = u0_ana(1:N_variables);
 
         if dficAnalytical
             u0 = u0_ana;
@@ -476,7 +388,6 @@ function solstruct = df(varargin)
 
                 u0(1:length(u0_input), 1) = u0_input; % add initial conditions for new variables from U_ANA
                 u0(length(u0_input) + 1:N_variables, 1) = u0_ana(length(u0_input) + 1:N_variables);
-
             else
                 u0 = u0_input;
             end
@@ -486,42 +397,68 @@ function solstruct = df(varargin)
         i = i + 1;
     end
 
-    %% - - - - - - - - - - BOUNDARY CONDITIONS - - - - - - - - - -
-
-    % refer to PDEPE help for the precise meaning of P and Q;
-    % l and r refer to left and right boundaries.
-
     function [Pl, Ql, Pr, Qr] = dfbc(xl, ul, xr, ur, t)
-
         ul_maxvar(1:N_variables) = ul;
         ur_maxvar(1:N_variables) = ur;
 
         V_l = ul_maxvar(1);
-        V_r = ur_maxvar(1);
+        V_r = ur_maxvar(1); % the potential at the right boundary
         n_l = ul_maxvar(2);
         n_r = ur_maxvar(2);
         p_l = ul_maxvar(3);
         p_r = ur_maxvar(3);
         c_l = ul_maxvar(4);
-        c_r = ur_maxvar(4);
+        c_r = ur_maxvar(4); % the cation density at the right boundary
         a_l = ul_maxvar(5);
-        a_r = ur_maxvar(5);
+        a_r = ur_maxvar(5); % the anion density at the right boundary
 
+        % - - - - - - - - - - voltage apply function
         switch par.V_fun_type
             case 'constant'
                 Vapp = par.V_fun_arg(1);
             otherwise
-                Vapp = Vapp_fun(par.V_fun_arg, t);
+                Vapp = Vapp_fun(par.V_fun_arg, t); % V_fun_arg = 0
         end
 
-        % flux boundary conditions for both carrier types.
+        % - - - - - - - - - - nernst (the SHE potential is used)
+        a_boundary = a_r; % the anion density at boundary
+        rho_boundary = dfana_ionic.denstochemact(a_boundary);
+        E_eq = dfana_ionic.nernst(rho_boundary, E_st, R, T, F, z); % SHE potential
+
+        % - - - - - - - - - - butler-volmer electrochemical current (at right hand interface)
         %
-        % calculate series resistance voltage Vres.
+        % - - - - - Note
+        % In resistive switching, the reaction between iodine interstitial and silver electrode happens,
+        % Ag + I- <--> AgI + e-
+        % the butler-volmer current arises from the reaction.
+        %
+        % In driftfusion, the potential of the left electrode is set to zero;
+        % therefore, an adjustment is added to the standard potential.
+        % In details, the left electrode is set to be zero (reference point),
+        % but in vaccum the hydrogen is the reference point,
+        % the standard potential of the Ag/AgI should be adjusted.
+
+        E_st_bv = par.Phi_left - E_hyd + E_st;
+        E_boundary = E_st_bv + V_r;
+        eta = E_boundary - E_eq;
+
+        j_bv = dfana_ionic.butlervolmer(j0, alpha_e, R, T, F, E_boundary, E_eq); % butler-volmer current density
+        f_bv = j_bv / e; % butler-volmer ionic flux
+
+        % fprintf('DEBUG: t=%g, E_boundary=%g, E_eq=%g, f_bv=%g, V_r=%g a_boundary=%g\n Vapp=%g\n', t, E_boundary, E_eq, f_bv, V_r, a_boundary, Vapp);
+        % fprintf('DEBUG: t=%g, E_eq_SHE=%g, E_eq_vac=%g, f_bv=%g, V_r=%g a_r=%g\n Vapp=%g\n', t, E_eq_SHE, E_eq_vac, f_bv, V_r, a_r, Vapp);
+
+        % - - - - - - - - - - save the calculated data
+        dfana_ionic.save_calcdata("E_boundary", E_boundary, ...
+            "E_eq", E_eq, ...
+            "eta", eta, ...
+            "a_boundary", a_boundary, ...
+            "t", t);
 
         if Rs == 0
             Vres = 0;
         else
-            J = e * sp_r * (p_r - p0_r) - e * sn_r * (n_r - n0_r); % here ???
+            J = e * sp_r * (p_r - p0_r) - e * sn_r * (n_r - n0_r) + j_bv; % electron current +  hole current + electrochemical current
 
             if Rs_initia
                 Vres = -J * Rs * t / par.tmax; % initial linear sweep
@@ -543,11 +480,11 @@ function solstruct = df(varargin)
               1;
               1; ];
 
-        Pr = [-V_r + Vbi - Vapp - Vres;
+        Pr = [-V_r + Vbi - Vapp - Vres; % V_r = Vbi - Vapp - Vres
               mobset * (sn_r * (n_r - n0_r));
               mobset * (sp_r * (p_r - p0_r));
               0;
-              0; ];
+              f_bv; ]; % butler-volmer ionic flux
 
         Qr = [0;
               1;

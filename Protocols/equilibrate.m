@@ -31,8 +31,9 @@ function soleq = equilibrate(varargin)
 
     % - - - - - - - - - - initial arguments
 
-    sol.u = 0; % setting sol.u = 0 enables a parameters structure to be read into DF
+    % setting sol.u = 0 enables a parameters structure to be read into DF
     % but indicates that the initial conditions should be the analytical solutions
+    sol.u = 0;
 
     par_origin = par; % store the original parameter set
 
@@ -175,7 +176,7 @@ function soleq = equilibrate(varargin)
         % sol = df(sol, par);
         %
         % - - - - - - - - - - updated ver.
-        sol = dfionic(sol, par);
+        sol = df_ionic(sol, par);
 
         all_stable = verifyStabilization(sol.u, sol.t, 0.7);
 
@@ -194,7 +195,7 @@ function soleq = equilibrate(varargin)
             % sol = df(sol, par);
             %
             % - - - - - - - - - - updated ver.
-            sol = dfionic(sol, par);
+            sol = df_ionic(sol, par);
 
             all_stable = verifyStabilization(sol.u, sol.t, 0.7);
         end

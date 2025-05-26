@@ -19,7 +19,7 @@
 % by the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
 
-%------------- BEGIN CODE --------------
+%% - - - - - - - - - - CODE START - - - - - - - - - -
 % clear all
 % prepare solutions and indirectly test equilibrate and genIntStructs
 % functions
@@ -43,7 +43,7 @@ JVsol = doJV(soleq.ion, 1e-2, 50, 1, true, 0, 1.0, 3);
 
 % solstruct = df(varargin)
 df();
- 
+
 %% Core df one input
 
 % solstruct = df(varargin)
@@ -63,7 +63,7 @@ df(soleq.ion, par);
 
 % ELx(varargin)
 dfplot.ELx(soleq.ion)
-dfplot.ELx(JVsol.ill.f,[0,100])
+dfplot.ELx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot Jt
 
@@ -74,13 +74,13 @@ dfplot.Jt(JVsol.ill.f, 2e-5)
 
 % Jx(varargin)
 dfplot.Jx(soleq.ion)
-dfplot.Jx(JVsol.ill.f,[0,100])
+dfplot.Jx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot jx
 
 % jx(varargin)
 dfplot.jx(soleq.ion)
-dfplot.jx(JVsol.ill.f,[0,100])
+dfplot.jx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot JV
 
@@ -91,7 +91,7 @@ dfplot.JV(JVsol, 3)
 
 % Jddx(varargin)
 dfplot.Jddx(soleq.ion)
-dfplot.Jddx(JVsol.ill.f,[0,100])
+dfplot.Jddx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot Voct
 
@@ -137,25 +137,25 @@ dfplot.xmesh(soleq.ion)
 
 % Vx(varargin)
 dfplot.Vx(soleq.ion)
-dfplot.Vx(JVsol.ill.f,[0,100])
+dfplot.Vx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot npx
 
 % npx(varargin)
 dfplot.npx(soleq.ion)
-dfplot.npx(JVsol.ill.f,[0,100])
+dfplot.npx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot acx
 
 % acx(varargin)
 dfplot.acx(soleq.ion)
-dfplot.acx(JVsol.ill.f,[0,100])
+dfplot.acx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot gx
 
 % gx(varargin)
 dfplot.gx(JVsol.ill.f)
-dfplot.gx(JVsol.ill.f,[0,100])
+dfplot.gx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot gxt
 
@@ -166,7 +166,7 @@ dfplot.gxt(JVsol.ill.f)
 
 % rx(varargin)
 dfplot.rx(JVsol.ill.f)
-dfplot.rx(JVsol.ill.f,[0,100])
+dfplot.rx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot JVrec
 
@@ -197,49 +197,49 @@ dfplot.QVapp(JVsol.ill.f, JVsol.ill.f.x(1), JVsol.ill.f.x(end))
 
 % rhox(varargin)
 dfplot.rhox(soleq.ion)
-dfplot.rhox(JVsol.ill.f,[0,100])
+dfplot.rhox(JVsol.ill.f, [0, 100])
 
 %% Core dfplot deltarhox
 
 % deltarhox(varargin)
 dfplot.deltarhox(JVsol.ill.f)
-dfplot.deltarhox(JVsol.ill.f,[0,100])
+dfplot.deltarhox(JVsol.ill.f, [0, 100])
 
 %% Core dfplot rhoxFxVx
 
 % rhoxFxVx(varargin)
 dfplot.rhoxFxVx(soleq.ion)
-dfplot.rhoxFxVx(JVsol.ill.f,[0,100])
+dfplot.rhoxFxVx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot rhoxVx
 
 % rhoxVx(varargin)
 dfplot.rhoxVx(soleq.ion)
-dfplot.rhoxVx(JVsol.ill.f,[0,100])
+dfplot.rhoxVx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot ELx_single
 
 % ELx_single(varargin)
 dfplot.ELx(soleq.ion)
-dfplot.ELx(JVsol.ill.f,[0,100])
+dfplot.ELx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot ELnpx
 
 % ELnpx(varargin)
 dfplot.ELnpx(soleq.ion)
-dfplot.ELnpx(JVsol.ill.f,[0,100])
+dfplot.ELnpx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot Vxacx
 
 % Vacx(varargin)
 dfplot.Vxacx(soleq.ion)
-dfplot.Vxacx(JVsol.ill.f,[0,100])
+dfplot.Vxacx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot Vionacx
 
 % Vionacx(varargin)
 dfplot.Vionxacx(soleq.ion)
-dfplot.Vionxacx(JVsol.ill.f,[0,100])
+dfplot.Vionxacx(JVsol.ill.f, [0, 100])
 
 %% Core dfplot Fiont
 
@@ -249,12 +249,12 @@ dfplot.Fiont(JVsol.ill.f, 2e-5)
 %% Core dfplot colourblocks
 
 % colourblocks(sol, yrange)
-dfplot.colourblocks(soleq.ion, [0,1])
+dfplot.colourblocks(soleq.ion, [0, 1])
 
 %% Core dfplot sortarg
 
 % [sol, tarr, pointtype, xrange] = sortarg(args)
-test_tarr = [0,10,100];
+test_tarr = [0, 10, 100];
 test_xrange = [150, 250];
 [~, ~, ~, ~] = dfplot.sortarg({JVsol.ill.f});
 [~, tarr, ~, ~] = dfplot.sortarg({JVsol.ill.f, test_tarr});
@@ -265,7 +265,7 @@ assert(all([tarr == test_tarr, xrange == test_xrange]))
 %% Core dfplot x2d
 
 % x2d(sol, xmesh, variables, legstr, linestyle, ylab, tarr, xrange, logx, logy)
-dfplot.x2d(JVsol.ill.f, JVsol.ill.f.x, {JVsol.ill.f.u(:,:,1)}, {'test'}, ['-','.'], 'ylab', JVsol.ill.f.t, [150,250], false, false)
+dfplot.x2d(JVsol.ill.f, JVsol.ill.f.x, {JVsol.ill.f.u(:, :, 1)}, {'test'}, ['-', '.'], 'ylab', JVsol.ill.f.t, [150, 250], false, false)
 
 %% Core build_device
 
@@ -374,7 +374,7 @@ dfana.calcVion(soleq.ion);
 %% Core dfana pdentrp
 
 % [U,Ux] = pdentrp(singular,m,xL,uL,xR,uR,xout)
-dfana.pdentrp(false,false,par.xx(123),soleq.ion.u(1,123,1),par.xx(124),soleq.ion.u(1,124,1),1e-6);
+dfana.pdentrp(false, false, par.xx(123), soleq.ion.u(1, 123, 1), par.xx(124), soleq.ion.u(1, 124, 1), 1e-6);
 
 %% Core ditro_fun nfun
 
@@ -394,10 +394,10 @@ Ec = -4.95;
 Dnfd = distro_fun.Dn_fd_fun(par.dev.Nc(end), Ec, Efn, par.mu_n(end), par.T);
 
 % Dsol = Dnlook(n, Dnfun, n_fd)
-distro_fun.Dnlook(soleq.ion.u(2,1,end), Dnfd.Dnfun, Dnfd.n_fd);
+distro_fun.Dnlook(soleq.ion.u(2, 1, end), Dnfd.Dnfun, Dnfd.n_fd);
 
 % Efn_fd = Efn_fd_fun(n, Efn, n_fd)
-distro_fun.Efn_fd_fun(soleq.ion.u(2,1,end), Efn, Dnfd.n_fd);
+distro_fun.Efn_fd_fun(soleq.ion.u(2, 1, end), Efn, Dnfd.n_fd);
 
 %% Core ditro_fun Dp_fd_fun and Dplook and Efp_fd_fun
 
@@ -406,10 +406,10 @@ distro_fun.Efn_fd_fun(soleq.ion.u(2,1,end), Efn, Dnfd.n_fd);
 Dpfd = distro_fun.Dp_fd_fun(par.dev.Nv(1), par.Phi_IP(1), Efp, par.mu_p(1), par.T);
 
 % Dsol = Dplook(p, Dpfun, p_fd)
-distro_fun.Dplook(soleq.ion.u(3,1,1), Dpfd.Dpfun, Dpfd.p_fd);
+distro_fun.Dplook(soleq.ion.u(3, 1, 1), Dpfd.Dpfun, Dpfd.p_fd);
 
 % Efp_fd = Efp_fd_fun(p, Efp, p_fd)
-distro_fun.Efp_fd_fun(soleq.ion.u(3,1,1), Efp, Dpfd.p_fd);
+distro_fun.Efp_fd_fun(soleq.ion.u(3, 1, 1), Efp, Dpfd.p_fd);
 
 %% Core fun_gen
 
@@ -510,7 +510,7 @@ sigma_sum_R_flux = compare_rec_flux(JVsol.ill.f, 1e6, 0.05, 1);
 
 %% Analysis
 % [n_ana, p_ana, jn_ana, jp_ana] = compare_carrier_interfaces(sol, tarr, plot_switch)
-[n_ana, p_ana, jn_ana, jp_ana] = compare_carrier_interfaces(JVsol.ill.f, JVsol.ill.f.t(end)*[0, 0.2, 0.4, 0.6], 1);
+[n_ana, p_ana, jn_ana, jp_ana] = compare_carrier_interfaces(JVsol.ill.f, JVsol.ill.f.t(end) * [0, 0.2, 0.4, 0.6], 1);
 
 %% Helper calcJsc, calcR0 and Eg_vs_Voc
 
@@ -528,7 +528,7 @@ getpointpos(1e-6, soleq.ion.x);
 %% Helper makemovie
 
 % Framefile = makemovie(sol, plotfun, xrange, yrange, movie_name, Vcounter, tcounter)
-makemovie(JVsol.dk.f, @dfplot.ELx, [0,100e-7], 0, 'test_makemovie_delete_me', true, true);
+makemovie(JVsol.dk.f, @dfplot.ELx, [0, 100e-7], 0, 'test_makemovie_delete_me', true, true);
 
 %% Helper verifyStabilization
 
@@ -564,7 +564,7 @@ doLightPulse(soleq.ion, 0.1, 1, 20, 5, true, false);
 %% Protocols doSDP and Analysis anasdp
 
 % sdpsol = doSDP(sol_ini, tdwell_arr, Vjump, pulse_int, pulse_tmax, duty, tpoints, scalefactor)
-sdpsol = doSDP(soleq.ion, [1e-3,1], 0.9, 1, 1, 5, 50, 1);
+sdpsol = doSDP(soleq.ion, [1e-3, 1], 0.9, 1, 1, 5, 50, 1);
 
 % anasdp(sdpsol, Jtr_time)
 anasdp(sdpsol, 1);
@@ -605,7 +605,7 @@ genIntStructsRealVoc(soleq.ion, 1e-4, 1e-3, 2, false);
 %% Protocols genVappStructs
 
 % VappSol = genVappStructs(solini, Vapp_arr, mobseti)
-genVappStructs(soleq.ion, [0.9,1.1,1.3], true);
+genVappStructs(soleq.ion, [0.9, 1.1, 1.3], true);
 
 %% Protocols jumptoV
 
@@ -630,7 +630,7 @@ sweeplight(soleq.ion, 1, 50, 1);
 %% Protocols transient_nid and Analysis transient_nid_ana
 
 % sol_OC = transient_nid(sol_ini, int_arr, stab_time, mobseti, Rs, pnts)
-sol_OC = transient_nid(soleq.ion, [0.01,0.1,1], 10, true, 1e9, 10);
+sol_OC = transient_nid(soleq.ion, [0.01, 0.1, 1], 10, true, 1e9, 10);
 transient_nid_ana(sol_OC);
 
 %% Protocols VappFunction
@@ -671,46 +671,53 @@ lightsource('AM15', 500);
 %% Optical LoadRefrIndex
 
 % [n_interp, k_interp] = LoadRefrIndex(name,wavelengths)
-LoadRefrIndex(par.material{1},300:767);
+LoadRefrIndex(par.material{1}, 300:767);
 
 %% Input_files
 inputs = dir('Input_files');
-for i=1:length(inputs)
+
+for i = 1:length(inputs)
     input = inputs(i).name;
     disp(input);
-    if ~any(regexp(input,'^\.'))
+
+    if ~any(regexp(input, '^\.'))
         par = pc(input);
         xpoints = round(1 + sum(par.layer_points));
 
         soleq = equilibrate(par);
-        
+
         el = soleq.el;
         el_s = size(el.u);
 
         exp_el_s = [el.par.tpoints, xpoints, 3];
         assert(all(el_s == exp_el_s), [input ': Expected size: %d, %d, %d. Obtained size: %d, %d, %d.'], el_s(1), el_s(2), el_s(3), exp_el_s(1), exp_el_s(2), exp_el_s(3));
         assert(~any(isnan(el.u(:))))
-        
+
         if par.N_ionic_species > 0
             ion = soleq.ion;
             ion_s = size(ion.u);
-            
-            exp_ion_s = [ion.par.tpoints, xpoints, round(3+par.N_ionic_species)];
+
+            exp_ion_s = [ion.par.tpoints, xpoints, round(3 + par.N_ionic_species)];
             assert(all(ion_s == exp_ion_s), [input ': Expected size: %d, %d, %d. Obtained size: %d, %d, %d.'], el_s(1), el_s(2), el_s(3), exp_el_s(1), exp_el_s(2), exp_el_s(3));
             assert(~any(isnan(ion.u(:))))
         end
+
     end
+
 end
 
 %% Scripts
 inputs = dir('Scripts');
+
 for i = 1:length(inputs)
     input = inputs(i).name;
-    if ~any(regexp(input,'^\.|^test'))
-        
+
+    if ~any(regexp(input, '^\.|^test'))
+
         disp(['### running script ' input]);
         run(input);
     end
+
 end
 
 %%
@@ -733,7 +740,7 @@ explore.getJtot(soleq.ion);
 %% Helper explore writevar
 
 % var = writevar(var, i, j, xx, arr)
-x=0;
+x = 0;
 explore.writevar(x, 1, 1, par.xx, 1);
 
 %% Helper explore helper
@@ -757,19 +764,19 @@ explore.plotstat_2D_parval2(exsol, 'Voc_r', true, false)
 % this functionality is currently not working.
 % % plotfinalELx(exsol)
 % explore.plotfinalELx(exsol)
-% 
+%
 % %% Helper explore plotprof_2D
-% 
+%
 % % plotprof_2D(exsol, yproperty, par1logical, par2logical, logx,logy)
 % explore.plotprof_2D(exsol, 'J_f', [true,true], [true,true], true, true)
-% 
+%
 % %% Helper explore plotU
-% 
+%
 % % plotU(exsol, par1logical, par2logical,logx,logy)
 % explore.plotU(exsol, [true,true], [true,true],false,false)
-% 
+%
 % %% Helper explore plotCE
-% 
+%
 % % plotCE(exsol_Voc, exsol_eq, xlogon, ylogon, zlogon, normalise)
 % explore.plotCE(exsol, exsol, false, false, false, "ciaomamma")
 
@@ -779,4 +786,3 @@ explore.plotstat_2D_parval2(exsol, 'Voc_r', true, false)
 explore.plotJV(exsol, [true, true, false, true], [true, false, true])
 
 %------------- END OF CODE --------------
-
