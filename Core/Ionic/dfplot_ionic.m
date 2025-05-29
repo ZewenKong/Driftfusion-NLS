@@ -26,6 +26,7 @@ classdef dfplot_ionic
             legend_label = cell(1, cycle);
 
             for i = 1:cycle
+
                 % round (), make sure idx is an integer
                 % (1 : data_pnts_per_cyc), current data points array
                 % e.g., round((1 - 1) * (data_pnts_per_cyc), 1st Cycle starts from 0
@@ -49,7 +50,10 @@ classdef dfplot_ionic
 
         function d2d(sols, var_1, var_2)
 
-            figure('Name', ['D2D (', var_1, ' & ', var_2, ')']);
+            var_1_name = inputname(2);
+            var_2_name = inputname(3);
+
+            figure('Name', ['D2D (', var_1_name, ' & ', var_2_name, ')']);
             hold on;
 
             for i = 1:size(sols, 1)
@@ -79,37 +83,6 @@ classdef dfplot_ionic
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        function Jpt(sol, xpos) % - - - - - - - - - - * New
-
-            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
-
-            [J, j, xmesh] = dfana.calcJ(sol);
-            ppos = getpointpos(xpos, xmesh);
-
-            figure(2);
-            scatter(t, J.p(:, ppos), 36);
-            xlabel('time [s]');
-            ylabel('J [A cm^{-2}]');
-            legend('Jp', 'FontSize', 16, 'EdgeColor', [1 1 1]);
-        end
-
-        function Jat(sol, xpos) % - - - - - - - - - - * New
-
-            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
-            [J, j, xmesh] = dfana.calcJ(sol);
-            ppos = getpointpos(xpos, xmesh);
-
-            figure(2);
-            plot(t, J.a(:, ppos));
-            legend('Ja');
-            xlabel('time [s]');
-            ylabel('J [A cm^{-2}]');
-            set(legend, 'FontSize', 16);
-            set(legend, 'EdgeColor', [1 1 1]);
-        end
-
-        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
         function Jt_species(sol, xpos)
 
             [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
@@ -129,47 +102,6 @@ classdef dfplot_ionic
             ylabel('J [A cm^{-2}]');
             set(legend, 'FontSize', 16);
             set(legend, 'EdgeColor', [1 1 1]);
-        end
-
-        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        function Jpx(varargin) % - - - - - - - - - - * New
-
-            [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
-            [J, j, x] = dfana.calcJ(sol);
-
-            figure(3);
-            dfplot.x2d(sol, x, {J.p}, ...
-                {'Jp'}, {'-'}, ...
-                'Current density [Acm-2]', tarr, xrange, 0, 0);
-        end
-
-        function Jnx(varargin) % - - - - - - - - - - * New
-
-            [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
-            [J, j, x] = dfana.calcJ(sol);
-
-            disp('size of x')
-            disp(size(x));
-
-            figure(3);
-            dfplot.x2d(sol, x, {J.n}, ...
-                {'Jn'}, {'-'}, ...
-                'Current density [Acm-2]', tarr, xrange, 0, 0);
-        end
-
-        function Jax(varargin) % - - - - - - - - - - * New
-
-            [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
-            [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
-            [J, j, x] = dfana.calcJ(sol);
-
-            figure(3);
-            dfplot.x2d(sol, x, {J.a}, ...
-                {'Ja'}, {'-'}, ...
-                'Current density [Acm-2]', tarr, xrange, 0, 0);
         end
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -218,11 +150,16 @@ classdef dfplot_ionic
             Q_ionic = par.e * trapz(x(p1:p2), rho_ionic(:, p1:p2), 2); % net charge
 
             figure('Name', 'Q(ionic) v.s. time');
-
+            yyaxis left
             plot(t, Q_ionic)
             xlabel('Time [s]')
             ylabel('Charge [C cm-2]')
             xlim([t(1), t(end)])
+
+            % add second y-axis for Vapp vs time
+            yyaxis right
+            Vapp = dfana.calcVapp(sol);
+            plot(t, Vapp);
         end
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

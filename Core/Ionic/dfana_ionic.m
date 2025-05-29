@@ -30,7 +30,8 @@ classdef dfana_ionic
             % E is the electrode potential on the electrochemical scale
             % E_eq, is the equilibrium potential calculated by Nernst equation on the electrochemical scale
 
-            j_bv = j0 * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T)));
+            j_bv =- j0 * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T))); % negative sign accounts for current direction being opposite to driftfusion direction sign
+
         end
 
         function save_calcdata(varargin)
@@ -88,7 +89,123 @@ classdef dfana_ionic
             rho_ionic = par.z_a * a + par.z_c * c - par.z_a * Nani - par.z_c * Ncat;
         end
 
-        %% - - - - - - - - - - NORMALISED MOBILITY INVESTIGATION - - - - - - - - - -
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        % after C2C simulation, this file is used to investigate the electronic current flux
+
+        function [J_max, J_corr, idx_J_max, idx_J_corr] = JmaxANDcorr(sol, xpos)
+
+            % function to find max J and its corresponding value
+
+            J = dfana.calcJ(sol);
+            Vapp = dfana.calcVapp(sol);
+
+            xmesh = sol.x;
+            ppos = getpointpos(xpos, xmesh);
+
+            J_temp = J.tot(:, ppos);
+            Vapp_temp = Vapp;
+
+            % get max J and its idx
+            [J_max, idx_J_max] = max(J_temp);
+
+            % get max J corresponding Vapp
+            V_corr_J_max = Vapp_temp(idx_J_max);
+
+            % filter the Vapp_temp
+            % find the V values smaller than / equal to V_corr_J_max
+            idx_filtered_arr = find(Vapp_temp <= V_corr_J_max);
+
+            % transfer to the max diff array
+            % get the max diff value
+            [max_diff, idx_max_diff] = max(diff(idx_filtered_arr));
+
+            % plus 1 to get the index of minuend
+            % which is the index of corresponding J value
+            idx_J_corr = idx_filtered_arr(idx_max_diff + 1);
+            J_corr = J_temp(idx_J_corr);
+        end
+
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        function [t_J_max, t_J_corr] = tPntOfSpJs(sol, xpos)
+
+            % time points of special current fluxes
+
+            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
+            J = dfana.calcJ(sol);
+            Vapp = dfana.calcVapp(sol);
+
+            xmesh = sol.x;
+            ppos = getpointpos(xpos, xmesh);
+
+            J_temp = J.tot(:, ppos);
+            Vapp_temp = Vapp;
+
+            [J_max, J_corr] = dfana_ionic.JmaxANDcorr(sol, xpos);
+
+            idx_J_max_1 = find(J_temp == J_max);
+            idx_J_corr_1 = find(J_temp == J_corr);
+
+            t_J_max = t(idx_J_max_1);
+            t_J_corr = t(idx_J_corr_1);
+
+        end
+
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        % different points investigation
+
+        function [selsoleq_1, selsoleq_2] = spPntTosoleq(sol, xpos) % selected (max J and its corr) point to equilibrium solution
+
+            % - - - - - - - - - - solution processing
+
+            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
+            J = dfana.calcJ(sol);
+            Vapp = dfana.calcVapp(sol);
+
+            % - - - - - - - - - - limitation
+
+            [J_max, J_corr, idx_J_max, idx_J_corr] = dfana_ionic.JmaxANDcorr(sol, xpos);
+            [t_J_max, t_J_corr] = dfana_ionic.tPntOfSpJs(sol, xpos);
+            idx_t_J_max = find(t == t_J_max);
+            idx_t_J_corr = find(t == t_J_corr);
+
+            % - - - - - - - - - - point of max J as new equilibrium solution
+
+            selsoleq_1 = sol;
+            selsoleq_1.u = sol.u(idx_t_J_max, :, :);
+            selsoleq_1.t = sol.t(idx_t_J_max);
+            V_corr_J_max = Vapp(idx_J_max);
+
+            selsoleq_1.par.mobseti = 0; % * set mobseti = 0;
+
+            [~, sol_dwell_1] = ramped_step(selsoleq_1, V_corr_J_max, 0.1, 0.1); % ramp the solution
+
+            sol_dwell_1.par.mobseti = 1; % set mobseti back
+
+            selsoleq_1 = sol_dwell_1;
+
+            % - - - - - - - - - - corrsponding point of max J as new equilibrium solution
+
+            selsoleq_2 = sol;
+            selsoleq_2.u = sol.u(idx_t_J_corr, :, :);
+            selsoleq_2.t = sol.t(idx_t_J_corr);
+            V_corr_J_corr = Vapp(idx_J_corr);
+
+            selsoleq_2.par.mobseti = 0;
+
+            [~, sol_dwell_2] = ramped_step(selsoleq_2, V_corr_J_corr, 0.1, 0.1);
+
+            sol_dwell_2.par.mobseti = 1;
+
+            selsoleq_2 = sol_dwell_2;
+
+        end
+
+        % ############################################################
+        % ### NORMALISED MOBILITY INVESTIGATION  #####################
+        % ############################################################
 
         function [F_idx, maxF_idx] = maxFatIF(sol)
 

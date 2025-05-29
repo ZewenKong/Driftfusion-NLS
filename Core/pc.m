@@ -293,6 +293,8 @@ classdef pc
 
         % - - - - - - - - - - butler-volmer calculation
         j0 = 1e-12; % exchange current density
+        % j0 = 0;
+
         alpha_a = 0.5; % anode charge transfer coefficient
         alpha_c = 0.5; % cathode charge transfer coefficient
         E_hyd = -4.44; % vaccum potential for hydrogen

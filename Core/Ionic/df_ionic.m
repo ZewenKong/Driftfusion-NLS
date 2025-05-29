@@ -6,7 +6,7 @@ function solstruct = df_ionic(varargin)
     %
     %% - - - - - - - - - - CODE START - - - - - - - - - -
 
-    % - - - - - - - - - - clear the calcdata generated in equilibrate.m
+    % - - - - - - - - - - clear the `calc` data structure in equilibrate.m
     global calc;
     clear calc;
     dfana_ionic.save_calcdata('reset');
@@ -74,11 +74,8 @@ function solstruct = df_ionic(varargin)
     x = xmesh;
 
     % - - - - - - - - - - time mesh
-    % - - - - - - - - - - original ver.
     t = meshgen_t(par);
-    %
-    % - - - - - - - - - - update ver. (increase time points (for fast pde convergence))
-    % t = meshgen_t(par);
+    % t = meshgen_t(par); % increase time points (for fast pde convergence)
     % par.tpoints = max(1000, par.tpoints * 5);
 
     % - - - - - - - - - - dependent properties
@@ -187,11 +184,14 @@ function solstruct = df_ionic(varargin)
     g1_fun = fun_gen(par.g1_fun_type); % constant
     g2_fun = fun_gen(par.g2_fun_type);
 
-    gxt1 = 0; gxt2 = 0;
+    gxt1 = 0;
+    gxt2 = 0;
     g = 0;
-    gx1 = par.gx1; gx2 = par.gx2; % light source 1 & 2
+    gx1 = par.gx1; % light source 1 & 2
+    gx2 = par.gx2;
 
-    int1 = par.int1; int2 = par.int2;
+    int1 = par.int1;
+    int2 = par.int2;
 
     g1_fun_type = par.g1_fun_type; % constant
     g2_fun_type = par.g2_fun_type;
@@ -397,7 +397,7 @@ function solstruct = df_ionic(varargin)
         i = i + 1;
     end
 
-    function [Pl, Ql, Pr, Qr] = dfbc(xl, ul, xr, ur, t)
+    function [Pl, Ql, Pr, Qr] = dfbc(xl, ul, xr, ur, t) % Driftfusion boundary condition
         ul_maxvar(1:N_variables) = ul;
         ur_maxvar(1:N_variables) = ur;
 
@@ -420,14 +420,23 @@ function solstruct = df_ionic(varargin)
                 Vapp = Vapp_fun(par.V_fun_arg, t); % V_fun_arg = 0
         end
 
+        % ============================================================
+        % === Butler-Volmer Electrochemical current/flux             =
+        % ============================================================
+
         % - - - - - - - - - - nernst (the SHE potential is used)
         a_boundary = a_r; % the anion density at boundary
         rho_boundary = dfana_ionic.denstochemact(a_boundary);
+
         E_eq = dfana_ionic.nernst(rho_boundary, E_st, R, T, F, z); % SHE potential
 
-        % - - - - - - - - - - butler-volmer electrochemical current (at right hand interface)
+        % - - - - - - - - - - butler-volmer current
+        E_st_bv = par.Phi_left - E_hyd + E_st;
+        E_boundary = E_st_bv + V_r;
+        eta = E_boundary - E_eq;
+
+        % butler-volmer electrochemical current (at right hand interface)
         %
-        % - - - - - Note
         % In resistive switching, the reaction between iodine interstitial and silver electrode happens,
         % Ag + I- <--> AgI + e-
         % the butler-volmer current arises from the reaction.
@@ -438,15 +447,10 @@ function solstruct = df_ionic(varargin)
         % but in vaccum the hydrogen is the reference point,
         % the standard potential of the Ag/AgI should be adjusted.
 
-        E_st_bv = par.Phi_left - E_hyd + E_st;
-        E_boundary = E_st_bv + V_r;
-        eta = E_boundary - E_eq;
-
         j_bv = dfana_ionic.butlervolmer(j0, alpha_e, R, T, F, E_boundary, E_eq); % butler-volmer current density
-        f_bv = j_bv / e; % butler-volmer ionic flux
 
-        % fprintf('DEBUG: t=%g, E_boundary=%g, E_eq=%g, f_bv=%g, V_r=%g a_boundary=%g\n Vapp=%g\n', t, E_boundary, E_eq, f_bv, V_r, a_boundary, Vapp);
-        % fprintf('DEBUG: t=%g, E_eq_SHE=%g, E_eq_vac=%g, f_bv=%g, V_r=%g a_r=%g\n Vapp=%g\n', t, E_eq_SHE, E_eq_vac, f_bv, V_r, a_r, Vapp);
+        % - - - - - - - - - - butler-volmer flux
+        f_bv = (- j_bv) / e; % butler-volmer ionic flux
 
         % - - - - - - - - - - save the calculated data
         dfana_ionic.save_calcdata("E_boundary", E_boundary, ...
