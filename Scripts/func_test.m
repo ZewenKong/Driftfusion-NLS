@@ -90,5 +90,4 @@ dfplot_ionic.Qt_ionic(sol_2, 0, sol_2.x(:, end));
 
 % ============================================================
 
-% one layer with both silver electrode (w/ or w/o BV)
 % const Vset and V read pulse
