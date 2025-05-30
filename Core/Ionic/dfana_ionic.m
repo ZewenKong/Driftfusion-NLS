@@ -179,10 +179,13 @@ classdef dfana_ionic
             V_corr_J_max = Vapp(idx_J_max);
 
             selsoleq_1.par.mobseti = 0; % * set mobseti = 0;
+            selsoleq_1.par.j0 = 0;
+            selsoleq_1.par = refresh_device(selsoleq_1.par);
 
             [~, sol_dwell_1] = ramped_step(selsoleq_1, V_corr_J_max, 0.1, 0.1); % ramp the solution
 
             sol_dwell_1.par.mobseti = 1; % set mobseti back
+            sol_dwell_1.par = refresh_device(sol_dwell_1.par);
 
             selsoleq_1 = sol_dwell_1;
 
@@ -194,18 +197,20 @@ classdef dfana_ionic
             V_corr_J_corr = Vapp(idx_J_corr);
 
             selsoleq_2.par.mobseti = 0;
+            selsoleq_2.par.j0 = 0;
+            selsoleq_2.par = refresh_device(selsoleq_2.par);
 
             [~, sol_dwell_2] = ramped_step(selsoleq_2, V_corr_J_corr, 0.1, 0.1);
 
             sol_dwell_2.par.mobseti = 1;
-
+            sol_dwell_2.par = refresh_device(sol_dwell_2.par);
             selsoleq_2 = sol_dwell_2;
 
         end
 
-        % ############################################################
-        % ### NORMALISED MOBILITY INVESTIGATION  #####################
-        % ############################################################
+        % ============================================================
+        % === NORMALISED MOBILITY INVESTIGATION                      =
+        % ============================================================
 
         function [F_idx, maxF_idx] = maxFatIF(sol)
 
@@ -258,7 +263,7 @@ classdef dfana_ionic
             % Plot: mun, Ea, thickness
         end
 
-        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        % ============================================================
 
     end
 
