@@ -1,8 +1,3 @@
-% Device-to-device (D2D) JV measurements,
-% to compare the different properties (thickness and mobility).
-%
-% Define the ON/OFF ratio depencdence on two variables.
-
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
 % - - - - - - - - - - data inputs
@@ -12,17 +7,16 @@ cation_mobility = [1e-9, 1e-10]; % var 2: cation mobility
 var_1 = active_thickness;
 var_2 = cation_mobility;
 
+% - - - - - - - - - - handles
+soleqs = cell(length(var_1), length(var_2));
+sols = cell(size(soleqs));
+
+% - - - - - - - - - - data processing
 par = pc(input);
 par.prob_distro_function = 'Boltz';
 par.tmesh_type = 'linear';
 par = refresh_device(par);
 xpos = 0;
-
-% - - - - - - - - - - handles
-soleqs = cell(length(var_1), length(var_2));
-sols = cell(size(soleqs));
-
-%% - - - - - - - - - - DATA PROCESSING - - - - - - - - - -
 
 for i = 1:length(var_1)
     par.d(3) = var_1(i); % edit the value by accessing the position
@@ -36,8 +30,7 @@ for i = 1:length(var_1)
 
 end
 
-%% - - - - - - - - - - DO MEASUREMENTS - - - - - - - - - -
-
+% - - - - - - - - - - do measurements
 for i = 1:size(soleqs, 1)
 
     for j = 1:size(soleqs, 2)
@@ -48,6 +41,5 @@ for i = 1:size(soleqs, 1)
 
 end
 
-%% - - - - - - - - - - PLOTTING - - - - - - - - - -
-
+%% - - - - - - - - - - plot
 dfplot_ionic.d2d(sols, xpos, var_1, var_2);

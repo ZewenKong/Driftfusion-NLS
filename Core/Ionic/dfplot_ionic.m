@@ -8,22 +8,26 @@ classdef dfplot_ionic
     methods (Static)
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        %
+        % plot function of cycle-to-cycle (C2C) characterisation
 
-        function c2c(J, Vapp, ppos, cycle)
+        function c2c(sol, xpos, cycle)
 
-            % J, current flux (can select different species)
-            % Vapp, applied voltage
-            % ppos, position point (xpos)
-            % cycle
-
-            figure('Name', 'Cycle-to-cycle Variability');
-            hold on;
-
+            % - - - - - - - - - - data process
+            J = dfana.calcJ(sol); % current flux (can select different species)
+            Vapp = dfana.calcVapp(sol); % applied voltage
+            t = sol.t;
+            xmesh = sol.x;
+            ppos = getpointpos(xpos, xmesh);
             data_pnts_per_cyc = length(Vapp) / (cycle);
 
             % - - - - - - - - - - handles
             legend_handle = [];
             legend_label = cell(1, cycle);
+
+            % - - - - - - - - - - plot
+            figure('Name', 'Cycle-to-cycle Variability');
+            hold on;
 
             for i = 1:cycle
 
@@ -47,29 +51,56 @@ classdef dfplot_ionic
         end
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        %
+        % plot function of device-to-device (D2D) characterisation with one variable
 
-        function d2d(sols, var_1, var_2)
+        function d2d_var(sols, xpos)
+            figure('Name', 'd2d');
+            hold on;
 
-            var_1_name = inputname(2);
-            var_2_name = inputname(3);
+            for i = 1:length(sols)
 
-            figure('Name', ['D2D (', var_1_name, ' & ', var_2_name, ')']);
+                % - - - - - - - - - -
+                J = dfana.calcJ(sols{i});
+                Vapp = dfana.calcVapp(sols{i});
+                t = sols{i}.t;
+
+                % - - - - - - - - - - spatial
+                xmesh = sols{i}.x;
+                ppos = getpointpos(xpos, xmesh);
+
+                % - - - - - - - - - - spatial
+                plot(Vapp, J.tot(:, ppos), 'DisplayName', ['D' num2str(i)]);
+            end
+
+            hold off;
+            xlabel('Applied Voltage, Vapp [V]');
+            ylabel('Current Density, J [A cm^{-2}]');
+            legend('Location', 'northwest', 'FontSize', 10);
+        end
+
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        %
+        % plot function of device-to-device (D2D) characterisation with two variables
+
+        function d2d_vars(sols, xpos, var_1, var_2)
+
+            figure('Name', ['D2D (two variables)']);
             hold on;
 
             for i = 1:size(sols, 1)
 
                 for j = 1:size(sols, 2)
                     xmesh = sols{i, j}.x;
-                    xpos = 0;
                     ppos = getpointpos(xpos, xmesh);
 
                     J = dfana.calcJ(sols{i, j});
                     Vapp = dfana.calcVapp(sols{i, j});
                     t = sols{i, j}.t;
 
-                    plot(Vapp, J.tot(:, end), ...
+                    plot(Vapp, J.tot(:, ppos), ...
                         'LineWidth', 0.5, ...
-                        'DisplayName', ['j0 = ', num2str(var_1(i)), ' B\_ionic = ', num2str(var_2(j))]);
+                        'DisplayName', ['var[1] = ', num2str(var_1(i)), ', var[2] = ', num2str(var_2(j))]);
 
                 end
 

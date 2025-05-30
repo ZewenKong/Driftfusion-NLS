@@ -1,3 +1,8 @@
+
+% - - - - - - - - - - initialisation
+equilibrate_init();
+initialise_df;
+
 % C2C
 % >> ON/OFF ratio; SET/REST voltage
 %

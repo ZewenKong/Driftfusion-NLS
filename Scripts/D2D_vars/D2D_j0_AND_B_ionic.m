@@ -1,22 +1,23 @@
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
-% - - - - - - - - - - data inputs & parameters processing
+% - - - - - - - - - - data inputs
 input = 'Input_files/pmpi.csv';
+
+j0_array = [1e-12, 5e-12]; % j0 numerical array, double row vector (dbv)
+B_ionic_array = [1e-15, 5e-15]; % B_ionic double row vector
+var_1 = j0_array;
+var_2 = B_ionic_array;
+xpos = 0;
+
+% - - - - - - - - - - data processing
 par = pc(input);
 par.prob_distro_function = 'Boltz';
 par.tmesh_type = 'linear';
 par = refresh_device(par);
 
-% - - - - - - - - - - d2d variables & handles
-j0_array = [1e-12, 5e-12]; % j0 numerical array, double row vector (dbv)
-B_ionic_array = [1e-15, 5e-15]; % B_ionic double row vector
-var_1 = j0_array;
-var_2 = B_ionic_array;
-
+% - - - - - - - - - - handles
 soleqs = cell(length(var_1), length(var_2));
 sols = cell(size(soleqs));
-
-%% - - - - - - - - - - DATA PROCESSING - - - - - - - - - -
 
 for i = 1:length(var_1)
     par.j0 = var_1(i); % j0
@@ -30,8 +31,7 @@ for i = 1:length(var_1)
 
 end
 
-%% - - - - - - - - - - DO MEASUREMENTS - - - - - - - - - -
-
+% - - - - - - - - - - do measurements
 for i = 1:size(soleqs, 1)
 
     for j = 1:size(soleqs, 2)
@@ -42,6 +42,5 @@ for i = 1:size(soleqs, 1)
 
 end
 
-%% - - - - - - - - - - PLOTTING - - - - - - - - - -
-
-dfplot_ionic.d2d(sols, var_1, var_2); % 'xpos' is in the function
+%% - - - - - - - - - - plot
+dfplot_ionic.d2d(sols, xpos, var_1, var_2);
