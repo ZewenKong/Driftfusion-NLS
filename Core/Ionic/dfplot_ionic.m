@@ -70,7 +70,7 @@ classdef dfplot_ionic
                 ppos = getpointpos(xpos, xmesh);
 
                 % - - - - - - - - - - spatial
-                plot(Vapp, J.tot(:, ppos), 'DisplayName', ['D' num2str(i)]);
+                plot(Vapp, J.tot(:, ppos), 'DisplayName', ['D' num2str(i)], 'LineWidth', 0.5);
             end
 
             hold off;

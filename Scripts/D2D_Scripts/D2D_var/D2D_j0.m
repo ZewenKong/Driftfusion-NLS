@@ -1,24 +1,31 @@
-% This script defines the scan rate (code from L.J.F.H).
-
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
 % - - - - - - - - - - data inputs
 input = 'Input_files/pmpi_v2.csv';
-scan_rts = [5e-2, 7.5e-2, 1e-1, 1.25e-1, 1.5e-1, 2e-1];
+j0s = [5e-14, 7.5e-14, 1e-15, 2.5e-15, 5e-15];
+var = j0s;
 
 % - - - - - - - - - - handle
-sols = cell(1, length(scan_rts)); % solutions cell array
+soleqs = cell(1, length(var));
+sols = cell(1, length(soleqs)); % solutions cell array
 
 % - - - - - - - - - - data processing
 par = pc(input);
 par.prob_distro_function = 'Boltz';
 par.tmesh_type = 'linear';
+par = refresh_device(par);
 xpos = 0;
-soleq = equilibrate(par);
+
+for i = 1:length(var)
+    par.j0 = var(i);
+    par = refresh_device(par);
+    soleqs{i} = equilibrate(par);
+end
 
 % - - - - - - - - - - do measurements
-for i = 1:length(scan_rts)
-    sol = doCV(soleq.ion, 0, 0, -1, 1, scan_rts(i), 1, 500); % solution
+for i = 1:length(soleqs)
+    soleq = soleqs{i};
+    sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, 1, 500); % solution
     sols{i} = sol;
 end
 

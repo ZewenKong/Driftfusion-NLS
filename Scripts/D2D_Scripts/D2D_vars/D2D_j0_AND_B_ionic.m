@@ -9,15 +9,15 @@ var_1 = j0_array;
 var_2 = B_ionic_array;
 xpos = 0;
 
+% - - - - - - - - - - handles
+soleqs = cell(length(var_1), length(var_2));
+sols = cell(size(soleqs));
+
 % - - - - - - - - - - data processing
 par = pc(input);
 par.prob_distro_function = 'Boltz';
 par.tmesh_type = 'linear';
 par = refresh_device(par);
-
-% - - - - - - - - - - handles
-soleqs = cell(length(var_1), length(var_2));
-sols = cell(size(soleqs));
 
 for i = 1:length(var_1)
     par.j0 = var_1(i); % j0
