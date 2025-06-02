@@ -292,7 +292,8 @@ classdef pc
         z = 1; % charge transfer (AgI + e- <--> Ag+ + I-)
 
         % - - - - - - - - - - butler-volmer calculation
-        j0 = 1e-12; % exchange current density
+        j0 = 1e-15; % exchange current density
+        % j0 = 1e-3;
         % j0 = 0;
 
         alpha_a = 0.5; % anode charge transfer coefficient

@@ -37,7 +37,7 @@ classdef dfplot_ionic
                 %       round((2 - 1) * (data_pnts_per_cyc), 2nd Cycle starts after 1st Cycle
 
                 cycle_idx = round(round(i - 1) * (data_pnts_per_cyc) + (1:data_pnts_per_cyc));
-                plots = plot(Vapp(cycle_idx), J.tot(cycle_idx, ppos), 'LineWidth', 0.75);
+                plots = plot(Vapp(cycle_idx), abs(J.tot(cycle_idx, ppos)), 'LineWidth', 0.75);
                 legend_handle = [legend_handle, plots];
                 legend_label{i} = ['C' num2str(i)];
             end
@@ -46,7 +46,7 @@ classdef dfplot_ionic
             box on;
 
             xlabel('Applied Voltage, Vapp [V]');
-            ylabel('Current Density, J [A cm^{-2}]');
+            ylabel('Current (A)');
             legend(legend_handle, legend_label, 'Location', 'northwest', 'FontSize', 10);
         end
 

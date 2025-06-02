@@ -4,7 +4,7 @@
 
 % - - - - - - - - - - data inputs
 input = 'Input_files/pmpi_v2.csv';
-scan_rts = [5e-2, 7.5e-2, 1e-1, 1.25e-1, 1.5e-1, 2e-1];
+scan_rts = [0.1, 0.2, 0.3, 0.4, 0.5];
 
 % - - - - - - - - - - handle
 sols = cell(1, length(scan_rts)); % solutions cell array
@@ -18,7 +18,7 @@ soleq = equilibrate(par);
 
 % - - - - - - - - - - do measurements
 for i = 1:length(scan_rts)
-    sol = doCV(soleq.ion, 0, 0, -1, 1, scan_rts(i), 1, 500); % solution
+    sol = doCV(soleq.ion, 0, 0, -1, 1, scan_rts(i), 1, 1000); % solution
     sols{i} = sol;
 end
 

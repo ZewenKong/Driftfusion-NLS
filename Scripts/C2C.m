@@ -14,7 +14,7 @@ xpos = 0; % define the device position point
 soleq = equilibrate(par);
 
 % - - - - - - - - - - do measurements
-sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, cycle, 500);
+sol = doCV(soleq.ion, 0, 0, -1, 1, 0.5, cycle, 500);
 
 %% - - - - - - - - - - plot
 dfplot_ionic.c2c(sol, xpos, cycle);

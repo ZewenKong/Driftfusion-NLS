@@ -472,6 +472,9 @@ function solstruct = df_ionic(varargin)
 
         end
 
+        % disp(['V_r: ', num2str(V_r), ', Vbi: ', num2str(Vbi), ', Vapp: ', num2str(Vapp), ', Vres: ', num2str(Vres)]);
+        % disp(['Pr Voltage Value: ', num2str(-V_r + Vbi - Vapp - Vres)]);
+
         Pl = [-V_l;
               mobset * (-sn_l * (n_l - n0_l));
               mobset * (-sp_l * (p_l - p0_l));
@@ -483,6 +486,12 @@ function solstruct = df_ionic(varargin)
               1;
               1;
               1; ];
+
+        Pr = [-V_r + Vbi - Vapp - Vres; % V_r = Vbi - Vapp - Vres
+              mobset * (sn_r * (n_r - n0_r));
+              mobset * (sp_r * (p_r - p0_r));
+              0;
+              f_bv; ];
 
         Pr = [-V_r + Vbi - Vapp - Vres; % V_r = Vbi - Vapp - Vres
               mobset * (sn_r * (n_r - n0_r));
