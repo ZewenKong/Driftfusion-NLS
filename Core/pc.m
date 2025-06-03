@@ -221,7 +221,7 @@ classdef pc
         % radiative recombination, r_rad = k(np - ni^2)
         %
         B = [3.6e-12]; % radiative recombination coefficient [cm3 s-1]
-        B_ionic = [0, 0, 0, 1e-15, 0];
+        B_ionic = [1e-10];
 
         % - - - - - - - - - - SRH time constants for each layer [s]
         taun = [1e6]; % SRH time constant for electrons [s]
