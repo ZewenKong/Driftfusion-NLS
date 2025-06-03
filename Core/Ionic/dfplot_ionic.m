@@ -11,7 +11,7 @@ classdef dfplot_ionic
         %
         % plot function of cycle-to-cycle (C2C) characterisation
 
-        function c2c(sol, xpos, cycle)
+        function c2c(sol, xpos, area_coeff, cycle, use_abs)
 
             % - - - - - - - - - - data process
             J = dfana.calcJ(sol); % current flux (can select different species)
@@ -37,7 +37,13 @@ classdef dfplot_ionic
                 %       round((2 - 1) * (data_pnts_per_cyc), 2nd Cycle starts after 1st Cycle
 
                 cycle_idx = round(round(i - 1) * (data_pnts_per_cyc) + (1:data_pnts_per_cyc));
-                plots = plot(Vapp(cycle_idx), abs(J.tot(cycle_idx, ppos)), 'LineWidth', 0.75);
+
+                if use_abs == 1
+                    plots = plot(Vapp(cycle_idx), abs(J.tot(cycle_idx, ppos)) * area_coeff, 'LineWidth', 0.75);
+                else
+                    plots = plot(Vapp(cycle_idx), (J.tot(cycle_idx, ppos) * area_coeff), 'LineWidth', 0.75);
+                end
+
                 legend_handle = [legend_handle, plots];
                 legend_label{i} = ['C' num2str(i)];
             end
@@ -48,6 +54,7 @@ classdef dfplot_ionic
             xlabel('Applied Voltage, Vapp [V]');
             ylabel('Current (A)');
             legend(legend_handle, legend_label, 'Location', 'northwest', 'FontSize', 10);
+            yscale log;
         end
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -191,6 +198,26 @@ classdef dfplot_ionic
             yyaxis right
             Vapp = dfana.calcVapp(sol);
             plot(t, Vapp);
+        end
+
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        % Energy level v.s. spatial (from dfplot.m)
+
+        function rELx(varargin) % revised
+
+            % Energy Level diagram, and charge densities plotter
+            % SOL = the solution structure
+            % TARR = An array containing the times that you wish to plot
+            % XRANGE = 2 element array with [xmin, xmax]
+
+            [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
+            [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
+            [Ecb, Evb, Efn, Efp] = dfana.calcEnergies(sol);
+
+            figure('Name', 'ELx');
+            dfplot.x2d(sol, x, {Efn, Efp, Ecb, Evb}, {'E_{fn}', 'E_{fp}', 'E_{CB}', 'E_{VB}'}, ...
+                {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
         end
 
         % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

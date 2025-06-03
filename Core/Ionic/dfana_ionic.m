@@ -208,6 +208,26 @@ classdef dfana_ionic
 
         end
 
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        % find time point of special voltage point
+
+        function t_sp = tOfSpV(sol, xpos, V_sp)
+
+            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
+            Vapp = dfana.calcVapp(sol);
+            xmesh = sol.x;
+            ppos = getpointpos(xpos, xmesh);
+            V_temp = Vapp;
+
+            % approximate 'find'
+            [~, idx_V_sp] = min(abs(V_temp - V_sp)); % idx_V_sp = find(V_temp == V_sp);
+
+            disp(['Sp V idx: ', num2str(idx_V_sp)]);
+
+            t_sp = t(idx_V_sp);
+        end
+
         % ============================================================
         % === NORMALISED MOBILITY INVESTIGATION                      =
         % ============================================================

@@ -6,7 +6,8 @@ par = pc(input);
 
 xpos = 0;
 cycle = 1;
-area_coeff = 0.01; % compare with cm^-2
+% area_coeff = 0.01; % compare with cm^-2
+area_coeff = 1;
 use_abs = 1; % 1 is on, 0 is off
 
 % - - - - - - - - - - parameters setting
@@ -19,7 +20,7 @@ par = refresh_device(par);
 soleq = equilibrate(par);
 
 % - - - - - - - - - - do measurements
-sol = doCV(soleq.ion, 0, 0, -1, 1, 0.5, 1, 500);
+sol = doCV(soleq.ion, 0, 0, -1, 1, 0.5, 1, 1000);
 
 %% - - - - - - - - - - C2C I-V plot
 dfplot_ionic.c2c(sol, xpos, area_coeff, cycle, use_abs);
