@@ -29,11 +29,11 @@ function soleq = equilibrate(varargin)
 
     %% - - - - - - - - - - INITIAL ARGUMENTS & GENERAL PARAMETERS - - - - - - - - - -
 
-    % - - - - - - - - - - initial arguments
+    % initial arguments
 
-    % setting sol.u = 0 enables a parameters structure to be read into DF
-    % but indicates that the initial conditions should be the analytical solutions
     sol.u = 0;
+    % setting sol.u = 0 enables a parameters structure to be read into DF,
+    % but indicates that the initial conditions should be the analytical solutions
 
     par_origin = par; % store the original parameter set
 
@@ -43,9 +43,9 @@ function soleq = equilibrate(varargin)
     par.N_ionic_species = 0; % start with no ionic carriers
     par.vsr_check = 0; % switch off volumetric surface recombination check
 
-    % - - - - - - - - - - general initial parameters
+    % general initial parameters
 
-    % - - - - - - - - - - voltage apply function & arguments
+    % voltage apply function & arguments
     par.V_fun_type = 'constant'; % set applied bias to zero
     par.V_fun_arg(1) = 0;
 
@@ -61,22 +61,20 @@ function soleq = equilibrate(varargin)
 
     %% - - - - - - - - - - INITIAL SOLUTION W/ ZERO MOBILITY - - - - - - - - - -
 
-    % - - - - - Note
-    % First, the simulation runs with zero mobilities
+    % first, the simulation runs with zero mobilities,
     % so that an analytical or initial condition is established
-    % without interference from transport effects.
+    % without interference from transport effects
 
     par.mobset = 0; % switch off mobilities (electronic)
     par.mobseti = 0; % switch off mobilities (ionic)
 
     disp('equilibrate.m: solution initialisation (zero mobility)'); disp('-');
-    sol = df(sol, par); % - - - - - - - - - - CALL df.m
+    sol = df(sol, par); % CALL df.m
     disp('equilibrate.m: complete initialisation (zero mobility)'); disp('-');
 
     %% - - - - - - - - - - INITIAL SOLUTION W/ MOBILITY - - - - - - - - - -
 
-    % - - - - - Note
-    % By enabling electronic mobilities and activating recombination mechanisms,
+    % by enabling electronic mobilities and activating recombination mechanisms,
     % the system allows electron and hole distributions
     % to adjust and reach an equilibrium state.
 
@@ -89,7 +87,7 @@ function soleq = equilibrate(varargin)
     par.t0 = par.tmax / 1e6;
 
     disp('equilibrate.m: solution initialisation (electronic mobility)'); disp('-');
-    sol = df(sol, par); % - - - - - - - - - - CALL df.m
+    sol = df(sol, par); % CALL df.m
 
     all_stable = verifyStabilization(sol.u, sol.t, 0.7); % check the solution reached a stabilized status (solution matrix, time array, time increment fraction)
 
@@ -97,10 +95,9 @@ function soleq = equilibrate(varargin)
 
     while any(all_stable) == 0
 
-        % - - - - - Note
-        % Loop the solution, to check electrons have reached stable config,
+        % loop the solution, to check electrons have reached stable config,
         % if not accelerate ions by order of mag,
-        % adding up the equilibration time to achieve equilibrium.
+        % adding up the equilibration time to achieve equilibrium
 
         disp(['equilibrate.m: increasing equilibration time, tmax = ', num2str(par.tmax * 10 ^ j)]); disp('-');
         par.tmax = 10 * par.tmax;
@@ -113,9 +110,8 @@ function soleq = equilibrate(varargin)
 
     soleq.el = sol; % solution equilibrium (electronic)
 
-    % - - - - - Note
-    % Manually check final section of solution for VSR self-consitency,
-    % and compare the interfacial recombination fluxes.
+    % manually check final section of solution for VSR self-consitency,
+    % and compare the interfacial recombination fluxes
 
     sol_ic = extract_IC(soleq.el, [soleq.el.t(end) * 0.7, soleq.el.t(end)]);
     compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
@@ -128,9 +124,8 @@ function soleq = equilibrate(varargin)
 
     if electronic_only == 0 && par_origin.N_ionic_species > 0
 
-        % - - - - - Note
-        % The simulation achieves full electrochemical equilibrium,
-        % including both electronic and ionic responses.
+        % the simulation achieves full electrochemical equilibrium,
+        % including both electronic and ionic responses
 
         par.N_ionic_species = par_origin.N_ionic_species; % par_origin = par
         sol = soleq.el; % create temporary solution for appending initial conditions to
@@ -138,24 +133,22 @@ function soleq = equilibrate(varargin)
 
         disp('equilibrate.m: solution initialisation (electronic and ionic mobility)'); disp('-');
 
-        % - - - - - - - - - - original ver.
+        % original ver.
         %
-        % Only allows for non-zero mobility in active layer),
-        % take ratio of electron and ion mobilities in the active layer.
+        % only allows for non-zero mobility in active layer),
+        % take ratio of electron and ion mobilities in the active layer
         %
         % rat_anion = par.mu_n(par.active_layer)/par.mu_a(par.active_layer);
         % rat_cation = par.mu_n(par.active_layer)/par.mu_c(par.active_layer);
         %
-        % - - - - - - - - - - * updated ver. (accounts non-zero mobility in any layer)
+        % updated ver. (accounts non-zero mobility in any layer)
         [max_mu_a, max_mu_a_idx] = max(par.mu_a);
         [max_mu_c, max_mu_c_idx] = max(par.mu_c);
-
         rat_anion = par.mu_n(par.active_layer) / par.mu_a(max_mu_a_idx);
         rat_cation = par.mu_n(par.active_layer) / par.mu_c(max_mu_c_idx);
 
-        % - - - - - Note
-        % If the ratio is infinity (ion mobility set to zero),
-        % then set the ratio to zero instead.
+        % if the ratio is infinity (ion mobility set to zero),
+        % then set the ratio to zero instead
 
         if isnan(rat_anion) || isinf(rat_anion)
             rat_anion = 0;
@@ -172,29 +165,33 @@ function soleq = equilibrate(varargin)
         par.tmax = 1e4 * t_diff;
         par.t0 = par.tmax / 1e3;
 
-        % - - - - - - - - - - original ver.
+        % original ver.
         % sol = df(sol, par);
         %
-        % - - - - - - - - - - updated ver.
+        % updated ver.
         sol = df_ionic(sol, par);
 
         all_stable = verifyStabilization(sol.u, sol.t, 0.7);
 
+        % j0_temp = par.j0; % temporary store of j0 value
+        % par.j0 = 0; %set bv j0 to zero for first ion equilibration
+        % par = refresh_device(par); % get the value
+
+        % run ionic stabilisation without Butler volmer boundary
         while any(all_stable) == 0
 
-            % - - - - - Note
-            % Loop the solution, to check ions have reached stable config,
-            % if not accelerate ions by order of mag.
+            % loop the solution, to check ions have reached stable config,
+            % if not accelerate ions by order of mag
 
             disp(['equilibrate.m: increasing equilibration time, tmax = ', num2str(par.tmax * 10 ^ j)]); disp('-');
 
             par.tmax = par.tmax * 10;
             par.t0 = par.tmax / 1e6;
 
-            % - - - - - - - - - - original ver.
+            % original ver.
             % sol = df(sol, par);
             %
-            % - - - - - - - - - - updated ver.
+            % updated ver.
             sol = df_ionic(sol, par);
 
             all_stable = verifyStabilization(sol.u, sol.t, 0.7);

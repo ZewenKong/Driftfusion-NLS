@@ -2,7 +2,7 @@
 
 % - - - - - - - - - - data inputs
 input = 'Input_files/pmpi_v2.csv';
-j0s = [5e-14, 7.5e-14, 1e-15, 2.5e-15, 5e-15];
+j0s = [1e-14, 1e-16, 1e-18, 1e-20];
 var = j0s;
 
 % - - - - - - - - - - handle
@@ -25,7 +25,7 @@ end
 % - - - - - - - - - - do measurements
 for i = 1:length(soleqs)
     soleq = soleqs{i};
-    sol = doCV(soleq.ion, 0, 0, -1, 1, 1e-1, 1, 500); % solution
+    sol = doCV(soleq.ion, 0, 0, -1, 1, 0.5, 1, 500); % solution
     sols{i} = sol;
 end
 

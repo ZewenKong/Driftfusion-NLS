@@ -53,10 +53,10 @@ function solstruct = df(varargin)
 
     %% - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
-    % - - - - - - - - - - physics constants
+    % physics constants
     kB = par.kB; q = par.q; e = par.e; epp0 = par.epp0; T = par.T;
 
-    % - - - - - - - - - - spatial mesh
+    % spatial mesh
     % xmesh, the spatial mesh
     % xx, thickness of the device (without electrode), distribute in number of layer_points
     xmesh = par.xx;
@@ -65,16 +65,16 @@ function solstruct = df(varargin)
     x_sub = par.x_sub;
     x = xmesh;
 
-    % - - - - - - - - - - time mesh
+    % time mesh
     % meshgen_t, core function which is used to generate time mesh (t)
     t = meshgen_t(par);
 
-    % - - - - - - - - - - dependent properties
+    % dependent properties
     Vbi = par.Vbi; % built-in voltage
     n0_l = par.n0_l; n0_r = par.n0_r; % equilibrium electron density
     p0_l = par.p0_l; p0_r = par.p0_r; % equilibrium hole density
 
-    % - - - - - - - - - - device parameters
+    % device parameters
     N_ionic_species = par.N_ionic_species; % number of ionic species in this solution (2)
     N_variables = par.N_ionic_species + 3; % number of variables in this solution (+3 for V, n, and p)
     N_max_variables = par.N_max_variables; % maximum number of variables in this version
@@ -82,7 +82,7 @@ function solstruct = df(varargin)
     dev = par.dev; % device parameters
     device = par.dev_sub; % sub-device parameters
 
-    % - - - - - - - - - - charge carriers mobilities
+    % charge carriers mobilities
     mu_n = device.mu_n; % electron mobility
     mu_p = device.mu_p; % hole mobility
     mu_c = device.mu_c; % cation mobility (e.g. 1e-8 in active layer, define from .csv file)
@@ -147,14 +147,14 @@ function solstruct = df(varargin)
     Rs = par.Rs; % series resistance
     gamma = par.gamma; % blakemore approximation coefficient, 0 for boltzmann stats
 
-    % - - - - - - - - - - original ver.
+    % original ver.
     % B = device.B;
     %
-    % - - - - - - - - - - * updated ver.
+    % updated ver.
     B = device.B; % radiative recombination rate coefficient
     B_ionic = device.B_ionic; % * rate coefficient for ions and vacancies
 
-    % - - - - - - - - - - switches and accelerator coefficients
+    % switches and accelerator coefficients
     mobset = par.mobset; % electronic carrier transport switch
     mobseti = par.mobseti; % ionic carrier transport switch
 
@@ -207,12 +207,12 @@ function solstruct = df(varargin)
         error('df.m: generation cannot be negative - please check your generation function and associated inputs')
     end
 
-    % - - - - - - - - - - voltage function
+    % voltage function
     Vapp_fun = fun_gen(par.V_fun_type);
     Vres = 0;
     J = 0;
 
-    % - - - - - - - - - - solver variables
+    % solver variables
     i = 1;
     V = 0; n = 0; p = 0; a = 0; c = 0;
     dVdx = 0; dndx = 0; dpdx = 0; dadx = 0; dcdx = 0;
@@ -222,7 +222,7 @@ function solstruct = df(varargin)
     alpha = 0; beta = 0;
     G_n = 1; G_p = 1; % diffusion enhancement prefactor of electrons/holes
 
-    % - - - - - - - - - - initialise solution arrays
+    % initialise solution arrays
     u_maxvar = zeros(N_max_variables, 1); % create a zeros matrix with size (N_max_variables, 1), a column vector
     dudx_maxvar = zeros(N_max_variables, 1);
     ul_maxvar = zeros(N_max_variables, 1);
@@ -230,14 +230,14 @@ function solstruct = df(varargin)
 
     %% - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
 
-    % - - - - - - - - - - latest ver.
+    % latest ver.
     % options = odeset( ...
     %     MaxStep=par.MaxStepFactor*0.1*par.tmax, ... % limit maximum time step size during integration
     %     RelTol=par.RelTol, ... % relative tolerance (default: 1e-3), controls acceptable relative error
     %     AbsTol=par.AbsTol ... % absolute tolerance (default: 1e-6), controls acceptable absolute error
     %     );
     %
-    % - - - - - - - - - - * pre-R2021a ver.
+    % pre-R2021a ver.
     options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ... % MaxStep = limit maximum time step size during integration
         'RelTol', par.RelTol, ...
         'AbsTol', par.AbsTol);
@@ -265,7 +265,7 @@ function solstruct = df(varargin)
         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
     end
 
-    % - - - - - - - - - - L.J.F.H Code
+    % L.J.F.H Code
     % if par.vsr_mode == 1 && par.vsr_check == 1
     %     try
     %         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
@@ -280,7 +280,6 @@ function solstruct = df(varargin)
     %         end
     %     end
     % end
-    % - - - - - - - - - -
 
     %% - - - - - - - - - - SUBFUNCTIONS - - - - - - - - - -
 
@@ -290,12 +289,12 @@ function solstruct = df(varargin)
 
     function [C, F, S] = dfpde(x, t, u, dudx)
 
-        % - - - - - - - - - - reset position point
+        % reset position point
         if x == x_sub(1) % x_sub, the device thickness array
             i = 1;
         end
 
-        % - - - - - - - - - - generation function (illumination)
+        % generation function (illumination)
         if g1_fun_type_constant
             gxt1 = int1 * gx1(i);
         else
@@ -310,7 +309,7 @@ function solstruct = df(varargin)
 
         g = gxt1 + gxt2;
 
-        % - - - - - - - - - - unpack variables
+        % unpack variables
         u_maxvar(1:N_variables) = u; % N_variables = ionic species (ion, vacancy) + 3 (V, n, p)
         % assign first 'N_variables' value of u and dudx to the u_maxvar and dudx_maxvar
         dudx_maxvar(1:N_variables) = dudx;
@@ -330,7 +329,7 @@ function solstruct = df(varargin)
         G_n = Nc(i) / (Nc(i) - gamma * n); % diffusion enhancement prefactors (gamma = 0 for Boltz)
         G_p = Nv(i) / (Nv(i) - gamma * p);
 
-        % - - - - - - - - - - equation editor
+        % equation editor
         % time-dependence pre-factor (pre-allocated above)
         % time-dependence prefactor term
 
@@ -341,13 +340,12 @@ function solstruct = df(varargin)
         C_a = 1;
         C = [C_V; C_n; C_p; C_c; C_a];
 
-        % - - - - - - - - - - flux terms
+        % flux terms
         %
         % flux, 通量项(物理量在空间上传递或流动的速率)
 
         F_V = (epp(i) / epp_factor) * dVdx;
 
-        % - - - - - Note
         % Electrons flux term
         %
         % First Part: 漂移 Drift
@@ -370,7 +368,6 @@ function solstruct = df(varargin)
         F_n = mu_n(i) * n * (-dVdx + gradEA(i)) + (G_n * mu_n(i) * kB * T * (dndx - ((n / Nc(i)) * gradNc(i))));
         F_p = mu_p(i) * p * (dVdx - gradIP(i)) + (G_p * mu_p(i) * kB * T * (dpdx - ((p / Nv(i)) * gradNv(i))));
 
-        % - - - - - Note
         % Cation flux term
         %
         % First Part: 漂移 Drift (z_c * c * dVdx)
@@ -405,16 +402,16 @@ function solstruct = df(varargin)
 
         r_np = r_rad + r_srh + r_vsr; % total electron and hole recombination
 
-        % - - - - - - - - - - source terms (V, n, p)
+        % source terms (V, n, p)
         S_V = (1 / (epp_factor * epp0)) * (-n + p - NA(i) + ND(i) + z_a * a + z_c * c - (z_a * Nani(i) + z_c * Ncat(i)));
         S_n = g - r_np;
         S_p = g - r_np;
 
-        % - - - - - - - - - - Ion and vacancy recombination
-        % - - - - - - - - - - original ver. (no ionic recombination)
+        % ion and vacancy recombination
+        % original ver. (no ionic recombination)
         % S_c = 0; S_a = 0;
         %
-        % - - - - - - - - - - * updated ver. (ion Frenkel pair recombination)
+        % updated ver. (ion Frenkel pair recombination)
         % [V_I][I-] <-> ([I_0])^2 % equilibrium reaction at interface PMPbI/PCBM
         r_iv = radset * B_ionic(i) * (a * c - ((dev.Nani(i)) * (dev.Ncat(i)))); % radiative
         S_c =- r_iv;
@@ -465,7 +462,7 @@ function solstruct = df(varargin)
 
         u0_ana = u0_ana(1:N_variables); % confirm the u0_ana with size of N_variables
 
-        % - - - - - - - - - - organise ICs based on number of variables and SOL_IC
+        % organise ICs based on number of variables and SOL_IC
 
         if dficAnalytical
             u0 = u0_ana;

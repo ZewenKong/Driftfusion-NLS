@@ -2,7 +2,7 @@
 
 % - - - - - - - - - - data inputs
 input = 'Input_files/pmpi_v2.csv';
-B_ionic_array = [1e-10, 1e-12, 1e-15, 1e-17];
+B_ionic_array = [1e-10, 1e-12, 1e-14, 1e-16];
 var = B_ionic_array;
 
 % - - - - - - - - - - handle

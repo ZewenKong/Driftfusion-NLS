@@ -208,8 +208,8 @@ classdef dfplot
             Vapp = dfana.calcVapp(sol);
 
             figure(9)
-            plot(Vapp, J.n(:, ppos), Vapp, J.p(:, ppos), Vapp, J.a(:, ppos), Vapp, J.disp(:, ppos), Vapp, J.tot(:, ppos));
-            legend('Jn', 'Jp', 'Ja', 'Jdisp', 'Jtotal')
+            plot(Vapp, J.n(:, ppos), Vapp, J.p(:, ppos), Vapp, J.c(:, ppos), Vapp, J.a(:, ppos), Vapp, J.disp(:, ppos), Vapp, J.tot(:, ppos));
+            legend('Jn', 'Jp', 'Jc', 'Ja', 'Jdisp', 'Jtotal')
             xlabel('Applied Voltage, Vapp [V]');
             ylabel('Current Density, J [A cm^{-2}]');
             set(legend, 'FontSize', 16);
@@ -348,41 +348,18 @@ classdef dfplot
                 'Carrier density [cm-3]', tarr, xrange, 0, 1)
         end
 
-        % - - - - - - - - - - * Updated ver.
-
         function acx(varargin)
-
-            % ionic carrier densities (a, c, static a, static c) as a
-            % function of position
-
+            % Ionic carrier densities as a function of position
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);
             [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
 
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
 
-            amax = max(a(:)); % max anion density also the density of accumulated anion at the edge
-
             figure('Name', 'acx');
-            dfplot.x2d(sol, x, ...
-                {a, c, Ncat, Nani}, ...
-                {'anion', 'cation', 'static cation', 'static anion'}, ...
-                {'-', '-', '--', '-.'}, ...
-                'Ionic carrier density [cm-3]', ...
-                tarr, xrange, 0, 0);
-
-            hold on
-            text('Units', 'normalized', ...
-                'Position', [0.75 0.05 0], ...
-                'String', sprintf('[anion] = %.5g', amax), ...
-                'VerticalAlignment', 'top', ...
-                'FontSize', 10);
-            hold off
-
-            axis square tight; % make plot square and tight
+            dfplot.x2d(sol, x, {a, c, Ncat, Nani}, {'anion', 'cation', 'static cation', 'static anion'}, {'-', '-', '--', '-.'}, ...
+                'Ionic carrier density [cm-3]', tarr, xrange, 0, 0);
         end
-
-        % - - - - - - - - - -
 
         function gx(varargin)
             [sol, tarr, pointtype, xrange] = dfplot.sortarg(varargin);

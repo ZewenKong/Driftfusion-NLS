@@ -2,16 +2,25 @@ classdef dfana_ionic
 
     methods (Static)
 
-        function a = denstochemact(density) % transfers charge carrier density to chemical activity
-            A = 6.022e23; % avogadro const.
-            a = (density * 10e3) / A; % (cm-3 to dm-3 (SI unit)) / avogadro const.
+        % ============================================================
+        % === IONIC FLUX CALCULATION                                 =
+        % ============================================================
 
-            % from wikipedia: for a given dissolved species, its chemical activity (a)
+        % charge carrier density to chemical activity
+
+        function a = denstochemact(density)
+
+            % Wikipedia: for a given dissolved species, its chemical activity (a)
             % is the product of its activity coefficient (γ) by its molar (mol/L solution),
             % or molal (mol/kg water), concentration (C): a = γ C.
+
+            A = 6.022e23; % avogadro const.
+            a = (density * 1e3) / A;
         end
 
-        function E_eq = nernst(a, E_st, R, T, F, z) % Nernst equation calculation
+        % Nernst equation
+
+        function E_eq = nernst(a, E_st, R, T, F, z)
 
             % a, the chemical activity
             % E_st, the standard potential (Ag/AgI = 0.152)
@@ -20,43 +29,53 @@ classdef dfana_ionic
             % F, Faraday constant
             % z, number of charge transfer (1)
 
-            E_eq = E_st - (((R * T) / F) / z) * log(a);
+            E_eq = E_st - ((R * T) / (F * z)) * log(a);
         end
 
-        function j_bv = butlervolmer(j0, alpha_e, R, T, F, E, E_eq) % Butler-Volmer calculation (ionic current flux)
+        % Butler-Volmer equation (ionic current flux)
+
+        function j_bv = butlervolmer(j0, alpha_e, R, T, F, E, E_eq)
 
             % j0, exchange current density (no bias)
+            % * negative sign accounts for current direction being opposite to driftfusion direction sign
+
             % alpha_e, electrode (anodic/cathodic) charge transfer coefficient, normally 1/2
             % E is the electrode potential on the electrochemical scale
             % E_eq, is the equilibrium potential calculated by Nernst equation on the electrochemical scale
 
-            j_bv =- j0 * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T))); % negative sign accounts for current direction being opposite to driftfusion direction sign
-
+            j_bv = (- j0) * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T)));
         end
 
-        function save_calcdata(varargin)
-            persistent calc;
+        % ============================================================
+        % === MISCELLANEOUS                                          =
+        % ============================================================
 
-            if nargin == 1 && ischar(varargin{1}) && strcmp(varargin{1}, 'reset')
+        % Save parmeters during calculation
+
+        function save_calcdata(varargin)
+
+            persistent calc; % persistent variable, the data value will be saved after function end (calculated results)
+
+            if nargin == 1 && ischar(varargin{1}) && strcmp(varargin{1}, 'reset') % if input is "reset"
                 calc = []; % reset the persistent variable
                 disp('dfana_ionic.m - func save_calcdata: persistent calc has been reset');
                 disp('-');
                 return;
             end
 
-            if isempty(calc)
-                calc = struct();
+            if isempty(calc) % if the calc = []
+                calc = struct(); % initialise the structure
             end
 
-            for i = 1:2:nargin
-                field_name = varargin{i}; % field name
-                field_value = varargin{i + 1}; % field value
+            for i = 1:2:nargin % save the data accroding to the numerical field (字段)
+                field_name = varargin{i}; % odd number-th field >> field name
+                field_value = varargin{i + 1}; % even number-th field >> field value
 
                 if ~isfield(calc, field_name)
                     calc.(field_name) = []; % initialise the field if it doesn't exist
                 end
 
-                calc.(field_name)(end + 1, 1) = field_value; % append the value to the field
+                calc.(field_name)(end + 1, 1) = field_value; % append the value to the corresponding field
             end
 
             assignin('base', 'calc', calc);
@@ -158,21 +177,18 @@ classdef dfana_ionic
 
         function [selsoleq_1, selsoleq_2] = spPntTosoleq(sol, xpos) % selected (max J and its corr) point to equilibrium solution
 
-            % - - - - - - - - - - solution processing
-
+            % solution processing
             [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
             J = dfana.calcJ(sol);
             Vapp = dfana.calcVapp(sol);
 
-            % - - - - - - - - - - limitation
-
+            % limitation
             [J_max, J_corr, idx_J_max, idx_J_corr] = dfana_ionic.JmaxANDcorr(sol, xpos);
             [t_J_max, t_J_corr] = dfana_ionic.tPntOfSpJs(sol, xpos);
             idx_t_J_max = find(t == t_J_max);
             idx_t_J_corr = find(t == t_J_corr);
 
-            % - - - - - - - - - - point of max J as new equilibrium solution
-
+            % point of max J as new equilibrium solution
             selsoleq_1 = sol;
             selsoleq_1.u = sol.u(idx_t_J_max, :, :);
             selsoleq_1.t = sol.t(idx_t_J_max);
@@ -189,8 +205,7 @@ classdef dfana_ionic
 
             selsoleq_1 = sol_dwell_1;
 
-            % - - - - - - - - - - corrsponding point of max J as new equilibrium solution
-
+            % corrsponding point of max J as new equilibrium solution
             selsoleq_2 = sol;
             selsoleq_2.u = sol.u(idx_t_J_corr, :, :);
             selsoleq_2.t = sol.t(idx_t_J_corr);
@@ -208,7 +223,7 @@ classdef dfana_ionic
 
         end
 
-        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        % - - - - - - - - - - - - - - - - - - - -
 
         % find time point of special voltage point
 
@@ -226,6 +241,23 @@ classdef dfana_ionic
             disp(['Sp V idx: ', num2str(idx_V_sp)]);
 
             t_sp = t(idx_V_sp);
+        end
+
+        % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        % find time point of special J point
+
+        function t_sp = tOfSpJ(sol, xpos, J_sp)
+            [~, t, ~, ~, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
+
+            J = dfana.calcJ(sol);
+            J_temp = J.tot;
+            xmesh = sol.x;
+            ppos = getpointpos(xpos, xmesh);
+
+            [~, idx_J_sp] = min(abs(J_temp - J_sp));
+            % disp(['Sp J idx: ', num2str(idx_J_sp)]);
+            t_sp = t(idx_J_sp);
         end
 
         % ============================================================
@@ -259,16 +291,13 @@ classdef dfana_ionic
             e = 1.6e-19; % elementary charge
             F = abs(Fmax); % the max energy for each sample
 
-            % - - - - - - - - - - Probability term
-
+            % Probability term
             Ea = 0.45 * e; % activation energy (eV), approximate value
             v0 = 5e12; % phonon frequency (General value)
             c = 1; % for a 1D transport, approximately equal to unity
 
-            % - - - - - - - - - - Equation
-
+            % Equation
             P = c * v0 * exp(- (Ea / (kB * T))); % transition probability
-
             vD = d * P * (exp((z * e * d * F) / (2 * kB * T)) ...
                 - exp(- (z * e * d * F) / (2 * kB * T)));
             vD0 = d * P * ((z * e * d * F) / (kB * T));

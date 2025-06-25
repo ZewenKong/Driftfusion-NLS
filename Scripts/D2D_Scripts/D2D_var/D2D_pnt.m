@@ -1,10 +1,8 @@
-% This script defines the scan rate (code from L.J.F.H).
-
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
 % - - - - - - - - - - data inputs
 input = 'Input_files/pmpi_v2.csv';
-scan_rts = [0.1, 0.25, 0.5, 0.75, 1];
+pnts = [100, 250, 300, 400, 500, 600, 750, 800];
 
 % - - - - - - - - - - handle
 sols = cell(1, length(scan_rts)); % solutions cell array
@@ -18,7 +16,7 @@ soleq = equilibrate(par);
 
 % - - - - - - - - - - do measurements
 for i = 1:length(scan_rts)
-    sol = doCV(soleq.ion, 0, 0, -1, 1, scan_rts(i), 1, 500); % solution
+    sol = doCV(soleq.ion, 0, 0, -1, 1, 0.5, 1, pnts(i)); % solution
     sols{i} = sol;
 end
 

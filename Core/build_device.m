@@ -19,7 +19,7 @@ function dev = build_device(par, meshoption)
             xmesh = par.x_sub;
     end
 
-    % - - - - - - - - - - constant properties
+    % constant properties
     dev.mu_c = build_property(par.mu_c, xmesh, par, 'constant', 0);
     dev.mu_a = build_property(par.mu_a, xmesh, par, 'constant', 0);
 
@@ -28,13 +28,13 @@ function dev = build_device(par, meshoption)
     dev.mu_n = build_property(par.mu_n, xmesh, par, 'constant', 0);
     dev.mu_p = build_property(par.mu_p, xmesh, par, 'constant', 0);
 
-    % - - - - - - - - - - linearly graded properties
+    % linearly graded properties
     dev.Phi_EA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 0);
     dev.Phi_IP = build_property(par.Phi_IP, xmesh, par, 'lin_graded', 0);
     dev.EF0 = build_property(par.EF0, xmesh, par, 'lin_graded', 0);
     dev.EF0_zerointerface = build_property(par.EF0, xmesh, par, 'zeroed', 0); % for plotting only
 
-    % - - - - - - - - - -  exponentially graded properties
+    % exponentially graded properties
     dev.Nc = build_property(par.Nc, xmesh, par, 'exp_graded', 0);
     dev.Nv = build_property(par.Nv, xmesh, par, 'exp_graded', 0);
     dev.n0 = build_property(par.n0, xmesh, par, 'exp_graded', 0);
@@ -44,7 +44,7 @@ function dev = build_device(par, meshoption)
     dev.a_max = build_property(par.a_max, xmesh, par, 'exp_graded', 0);
     dev.c_max = build_property(par.c_max, xmesh, par, 'exp_graded', 0);
 
-    % - - - - - - - - - - properties that are zeroed in the interfaces
+    % properties that are zeroed in the interfaces
     dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
     dev.B = build_property(par.B, xmesh, par, 'zeroed', 0); % build the device, B
     dev.B_ionic = build_property(par.B_ionic, xmesh, par, 'constant', 0); % interface between RPP and PCBM
@@ -52,13 +52,13 @@ function dev = build_device(par, meshoption)
     dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
     dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
 
-    % - - - - - - - - - - gradient properties
+    % gradient properties
     dev.gradEA = build_property(par.Phi_EA, xmesh, par, 'lin_graded', 1);
     dev.gradIP = build_property(par.Phi_IP, xmesh, par, 'lin_graded', 1);
     dev.gradNc = build_property(par.Nc, xmesh, par, 'exp_graded', 1);
     dev.gradNv = build_property(par.Nv, xmesh, par, 'exp_graded', 1);
 
-    % - - - - - - - - - - surface recombination velocity equivalence schemes
+    % surface recombination velocity equivalence schemes
     dev.taun_vsr = build_property(par.taun, xmesh, par, 'taun_vsr', 0);
     dev.taup_vsr = build_property(par.taup, xmesh, par, 'taup_vsr', 0);
     dev.alpha0 = build_property(0, xmesh, par, 'alpha0', 1);
@@ -67,7 +67,7 @@ function dev = build_device(par, meshoption)
     dev.beta0_xp = build_property(0, xmesh, par, 'beta0_xp', 1);
     dev.dint = build_property(0, xmesh, par, 'dint', 1);
 
-    % - - - - - - - - - - switches
+    %  switches
 
     % property vriable name is 0,
     % `init_switch`, at interface = 1, at layer = 0;
@@ -104,7 +104,7 @@ function dev = build_device(par, meshoption)
         dev.pt = build_property(par.pt, xmesh, par, 'exp_graded', 0);
     end
 
-    % - - - - - - - - - -  tranlsated co-ordinates
+    % tranlsated co-ordinates
     dev.xprime = build_property(par.xx, xmesh, par, 'xprime', 1);
     dev.xprime_n = build_property(par.xx, xmesh, par, 'xprime_n', 1);
     dev.xprime_p = build_property(par.xx, xmesh, par, 'xprime_p', 1);
