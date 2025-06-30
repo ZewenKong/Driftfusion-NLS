@@ -19,7 +19,7 @@ function devprop = build_property(property, xmesh, par, interface_switch, gradie
     % by the Free Software Foundation, either version 3 of the License, or
     % (at your option) any later version.
 
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     devprop = zeros(1, length(xmesh));
 
@@ -51,7 +51,7 @@ function devprop = build_property(property, xmesh, par, interface_switch, gradie
                     xprime = xmesh(j) - par.dcum0(i);
                     deff = par.d(i);
 
-                    % Gradient coefficient for surface recombination equivalence
+                    % gradient coefficient for surface recombination equivalence
                     alpha0 = ((par.Phi_EA(i - 1) - par.Phi_EA(i + 1)) / (par.kB * par.T) + (log(par.Nc(i + 1)) - log(par.Nc(i - 1)))) / deff;
 
                     if alpha0 < 0
@@ -62,7 +62,7 @@ function devprop = build_property(property, xmesh, par, interface_switch, gradie
                         alpha0_xn = -alpha0; % the sign of alpha0 is referenced to the direction of xprime_n
                     end
 
-                    % Gradient coefficient for surface recombination equivalence
+                    % gradient coefficient for surface recombination equivalence
                     beta0 = ((par.Phi_IP(i + 1) - par.Phi_IP(i - 1)) / (par.kB * par.T) + (log(par.Nv(i + 1)) - log(par.Nv(i - 1)))) / deff;
 
                     if beta0 < 0

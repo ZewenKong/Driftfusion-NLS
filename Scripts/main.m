@@ -25,3 +25,5 @@ D2D_device;
 % comparison of CV w and w/o BV
 % change the start point (0.292)
 % 0 -> 1.3 -> -0.7
+
+% calculate the variable back (overpotential ...)

@@ -1,5 +1,5 @@
 function x = meshgen_x(par)
-% Generates the spatial mesh dependent on option defined by XMESH_TYPE
+% generates the spatial mesh dependent on option defined by XMESH_TYPE
 %
 %% LICENSE
 % Copyright (C) 2020  Philip Calado, Ilario Gelmetti, and Piers R. F. Barnes
@@ -9,12 +9,13 @@ function x = meshgen_x(par)
 % by the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
 %
-%% Start code
+% - - - - - - - - - - CODE START - - - - - - - - - -
+
 xmesh_type = par.xmesh_type;
 
 switch xmesh_type
-    % Linearly spaced
-    case 'linear'
+
+    case 'linear' % linearly spaced
         d = par.dcell;
         p = par.layer_points;
         dcum0 = par.dcum0;
@@ -28,12 +29,12 @@ switch xmesh_type
         x = [x, dcum0(end)];
         
     case 'erf-linear'
-        % Error function for each layer
+        % error function for each layer
         d = par.dcell;
         p = par.layer_points;
         dcum0 = par.dcum0;
         
-        % For backwards compatibility
+        % for backwards compatibility
         if length(par.xmesh_coeff) < length(p)
             xmesh_coeff = 0.7*ones(1, length(p));
         else
@@ -45,8 +46,8 @@ switch xmesh_type
             if any(strcmp(par.layer_type{1,i}, {'layer', 'active'}))
                 parr = -0.5 : (1/p(i)) : 0.5;
                 x_layer = erf(2*pi*xmesh_coeff(i)*parr);
-                x_layer = x_layer - x_layer(1);       % Subtract base to get zero
-                x_layer  = x_layer./max(x_layer);   % Normalise the funciton
+                x_layer = x_layer - x_layer(1);  % subtract base to get zero
+                x_layer  = x_layer./max(x_layer);  % normalise the funciton
                 x_layer = dcum0(i) + x_layer * d(i);
                 xcell{i} = x_layer(1:end-1);
             elseif any(strcmp(par.layer_type{1,i}, {'junction', 'interface'}))

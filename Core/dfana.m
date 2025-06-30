@@ -10,7 +10,7 @@ classdef dfana
     % by the Free Software Foundation, either version 3 of the License, or
     % (at your option) any later version.
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     methods (Static)
 
@@ -55,8 +55,8 @@ classdef dfana
             % Simple structure names
             [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
 
-            Ecb = dev.Phi_EA - V; % Conduction band potential
-            Evb = dev.Phi_IP - V; % Valence band potential
+            Ecb = dev.Phi_EA - V; % conduction band potential
+            Evb = dev.Phi_IP - V; % valence band potential
             Efn = zeros(size(n, 1), size(n, 2));
             Efp = zeros(size(n, 1), size(n, 2));
 
@@ -80,14 +80,14 @@ classdef dfana
                     Efp = real(Evb - (par.kB * par.T / par.q) * log(p ./ (dev.Nv - par.gamma * p)));
 
                 case 'Boltz'
-                    Efn = real(Ecb + (par.kB * par.T / par.q) * log(n ./ dev.Nc)); % Electron quasi-Fermi level
-                    Efp = real(Evb - (par.kB * par.T / par.q) * log(p ./ dev.Nv)); % Hole quasi-Fermi level
+                    Efn = real(Ecb + (par.kB * par.T / par.q) * log(n ./ dev.Nc)); % electron quasi-Fermi level
+                    Efp = real(Evb - (par.kB * par.T / par.q) * log(p ./ dev.Nv)); % hole quasi-Fermi level
             end
 
         end
 
         function [J, j, x] = calcJ(sol)
-            % Current, J and flux, j calculation from continuity equations
+            % current, J and flux, j calculation from continuity equations
             % obtain SOL components for easy referencing
             [u, t, xmesh, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
 
@@ -104,20 +104,20 @@ classdef dfana
             [~, dadt] = gradient(a_sub, x, t);
             [~, dcdt] = gradient(c_sub, x, t);
 
-            % Recombination
+            % recombination
             r = dfana.calcr(sol, "sub");
 
             djndx = -dndt + g - r.tot;
             djpdx = -dpdt + g - r.tot;
-            djadx = -dadt; % Add source terms as necessary
-            djcdx = -dcdt; % Add source terms as necessary
+            djadx = -dadt; % add source terms as necessary
+            djcdx = -dcdt; % add source terms as necessary
 
             deltajn = cumtrapz(x, djndx, 2);
             deltajp = cumtrapz(x, djpdx, 2);
             deltaja = cumtrapz(x, djadx, 2);
             deltajc = cumtrapz(x, djcdx, 2);
 
-            %% Currents from the boundaries
+            % currents from the boundaries
             jn_l = -par.sn_l * (n(:, 1) - par.n0_l);
             jn_r = par.sn_r * (n(:, end) - par.n0_r);
 
@@ -130,11 +130,10 @@ classdef dfana
             ja_l = 0;
             ja_r = 0;
 
-            % Calculate total electron and hole currents from fluxes
-            % Use the minority carrier flux as the boundary condition
+            % calculate total electron and hole currents from fluxes
+            % use the minority carrier flux as the boundary condition
             if par.p0_l == par.n0_l && par.n0_r == par.p0_r
-                % Intrinsic both sides then integrate from side with lowest
-                % density
+                % intrinsic both sides then integrate from side with lowest density
                 if par.n0_r > par.n0_l
                     j.n = jn_l + deltajn;
                 else
@@ -165,7 +164,7 @@ classdef dfana
             j.c = jc_l + deltajc;
             j.a = ja_l + deltaja;
 
-            % Apply switches and accelerators
+            % apply switches and accelerators
             j.n = par.mobset * j.n;
             j.p = par.mobset * j.p;
             j.c = par.mobseti * par.K_c * j.c;
@@ -183,13 +182,14 @@ classdef dfana
             J.a = j.a * par.z_a * par.e;
             J.disp = j.disp * par.e;
 
-            % Total current
+            % total current
             J.tot = J.n + J.p + J.a + J.c + J.disp;
         end
 
         function [g1, g2, g] = calcg(sol)
             [~, tmesh, ~, par, ~, ~, ~, ~, ~, ~] = dfana.splitsol(sol);
-            %% Generation function
+
+            % generation function
             switch par.g1_fun_type
                 case 'constant'
                     g1 = repmat(par.int1 .* par.gx1, length(tmesh), 1);
@@ -210,9 +210,8 @@ classdef dfana
         end
 
         function Pin = calcPin(sol)
-            % Incident optical power density
-            % Note this integrates across the available spectrum
-            % within AM15.xls
+            % incident optical power density
+            % note this integrates across the available spectrum within AM15.xls
             if strcmp(sol.par.optical_model, 'Beer-Lambert')
                 AM15_data = readtable('AM15.xls', 'VariableNamingRule', 'preserve');
                 Pin = 1e-3 * trapz(AM15_data.(1), AM15_data.(2));
@@ -224,10 +223,11 @@ classdef dfana
         end
 
         function [r, ns, ps, alpha_xn, beta_xp] = calcr(sol, mesh_option)
-            % Calculate the recombination rate on i-half mesh
+            % calculate the recombination rate on i-half mesh
             % obtain SOL components for easy referencing
-            % MESH_OPTION = "whole" for input mesh or "sub" for subinetrval
-            % mesh
+            %
+            % MESH_OPTION = "whole" for input mesh or "sub" for subinetrval mesh
+
             [u, t, x_input, par, ~, n, p, a, c, V] = dfana.splitsol(sol);
 
             switch mesh_option
@@ -262,30 +262,32 @@ classdef dfana
             alpha_xn = (sign_xn .* par.q .* dVdx ./ (par.kB * par.T)) + alpha0_xn;
             beta_xp = (sign_xp .* par.q .* -dVdx ./ (par.kB * par.T)) + beta0_xp;
 
-            % Band-to-band
+            % band-to-band
             r.btb = dev.B .* (n .* p - dev.ni .^ 2);
-            % Bulk SRH
+
+            % bulk SRH
             r.srh = srh_zone .* (n .* p - dev.ni .^ 2) ...
                 ./ (dev.taun .* (p + dev.pt) + dev.taup .* (n + dev.nt));
-            % Volumetric surface SRH
-            ns = n .* exp(-alpha_xn .* xprime_n); % Projected electron surface density
-            ps = p .* exp(-beta_xp .* xprime_p); % Projected hole surface density
+
+            % volumetric surface SRH
+            ns = n .* exp(-alpha_xn .* xprime_n); % projected electron surface density
+            ps = p .* exp(-beta_xp .* xprime_p); % projected hole surface density
             r.vsr = vsr_zone .* (ns .* ps - dev.nt .* dev.pt) ...
                 ./ (dev.taun_vsr .* (ps + dev.pt) + dev.taup_vsr .* (ns + dev.nt));
-            % System boundary surface recombination i.e. minority carrier
-            % currents
+            % system boundary surface recombination i.e. minority carrier currents
 
-            % Total
+            % total
             r.tot = r.btb + r.srh + r.vsr;
 
         end
 
         function j_surf_rec = calcj_surf_rec(sol)
-            % Calculates the absolute surface recombination flux for system
-            % boundaries.
+
+            % calculates the absolute surface recombination flux for system boundaries
+
             [u, t, x_input, par, ~, n, p, a, c, V] = dfana.splitsol(sol);
 
-            %% Absolute fluxes at the boundaries
+            % absolute fluxes at the boundaries
             [~, j, ~] = dfana.calcJ(sol);
             jn_l = abs(j.n(:, 1));
             jn_r = abs(j.n(:, end));
@@ -299,20 +301,24 @@ classdef dfana
             j_surf_rec.p_r = zeros(1, length(t));
 
             if par.p0_l == par.n0_l && par.n0_r == par.p0_r
-                % Intrinsic both sides then can be either?
+                % intrinsic both sides then can be either?
                 j_surf_rec.l = jn_l;
                 j_surf_rec.r = jn_r;
+
             elseif par.p0_l >= par.n0_l && par.n0_r >= par.p0_r
                 % p-type left boundary, n-type right boundary
                 j_surf_rec.l = jn_l;
                 j_surf_rec.r = jp_r;
+
             elseif par.n0_l >= par.n0_r && par.p0_r >= par.n0_r
                 % n-type left boundary, p-type right boundary
                 j_surf_rec.l = jp_l;
                 j_surf_rec.r = jn_r;
+
             elseif par.p0_l >= par.n0_l && par.p0_r >= par.n0_r
                 j_surf_rec.l = jn_l;
                 j_surf_rec.r = jn_r;
+
             elseif par.n0_l >= par.p0_l && par.n0_r >= par.p0_r
                 % p-type both boundaries or n-type both boundaries
                 j_surf_rec.l = jp_l;
@@ -341,7 +347,8 @@ classdef dfana
         end
 
         function [Jdd, jdd, xout] = calcJdd(sol)
-            % Calculates drift and diffusion currents at every point and all times -
+            % calculates drift and diffusion currents at every point and all times -
+            %
             % NOTE: UNRELIABLE FOR TOTAL CURRENT as errors in the calculation of the
             % spatial gradients mean that the currents do not cancel properly
             % obtain SOL components for easy referencing
@@ -349,7 +356,7 @@ classdef dfana
             xout = par.x_sub;
             dev = par.dev_sub;
 
-            % Property matrices
+            % property matrices
             eppmat = dev.epp;
             mu_n_mat = dev.mu_n;
             mu_p_mat = dev.mu_p;
@@ -374,8 +381,8 @@ classdef dfana
             dadx = zeros(length(t), length(xout));
             dcdx = zeros(length(t), length(xout));
 
-            %% Avoid PDEVAL for faster calculation
-            % Obtain variables and gradients on sub-interval mesh
+            % avoid PDEVAL for faster calculation
+            % obtain variables and gradients on sub-interval mesh
             for i = 1:length(t)
                 V_sub(i, :) = 0.5 * (V(i, 2:end) + V(i, 1:end - 1));
                 n_sub(i, :) = 0.5 * (n(i, 2:end) + n(i, 1:end - 1));
@@ -390,7 +397,7 @@ classdef dfana
                 dadx(i, :) = (a(i, 2:end) - a(i, 1:end - 1)) ./ (x(2:end) - x(1:end - 1));
             end
 
-            % Diffusion coefficients
+            % diffusion coefficients
             switch par.prob_distro_function
                 case 'Fermi'
 
@@ -408,7 +415,7 @@ classdef dfana
                     Dp_mat = mu_p_mat * par.kB * par.T;
             end
 
-            % Particle fluxes (remember F = -dVdx)
+            % particle fluxes (remember F = -dVdx)
             jdd.ndrift = mu_n_mat .* n_sub .* (dVdx - gradEA_mat);
             jdd.ndiff = -Dn_mat .* (dndx - ((n_sub ./ Nc_mat) .* gradNc_mat));
             jdd.pdrift = mu_p_mat .* p_sub .* (-dVdx + gradIP_mat);
@@ -432,18 +439,18 @@ classdef dfana
                     jdd.adiff = -mu_ani .* par.kB * par.T .* dadx;
             end
 
-            % Note these have a negative sign compared with the expressions in DFPDE
+            % note these have a negative sign compared with the expressions in DFPDE
             jdd.n = par.mobset * (jdd.ndrift + jdd.ndiff);
             jdd.p = par.mobset * (jdd.pdrift + jdd.pdiff);
             jdd.a = par.mobseti * (jdd.adrift + jdd.adiff);
             jdd.c = par.mobseti * (jdd.cdrift + jdd.cdiff);
 
-            % Displacement current
+            % displacement current
             [~, dFdt] = gradient(-dVdx, xout, t);
             j.disp = par.epp0 .* eppmat .* dFdt;
 
             jdd.disp = j.disp;
-            % The total flux here includes the sign of the carrier
+            % the total flux here includes the sign of the carrier
             jdd.tot = -jdd.n + jdd.p - jdd.a + jdd.c + jdd.disp;
 
             Jdd.ndrift = jdd.ndrift * par.e;
@@ -464,9 +471,11 @@ classdef dfana
         end
 
         function [FV, Frho] = calcF(sol, mesh_option)
-            % Electric field caculation
+            % dlectric field caculation
+            %
             % FV = Field calculated from the gradient of the potential
             % Frho = Field calculated from integrated space charge density
+
             [u, t, x_whole, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
 
             switch mesh_option
@@ -490,7 +499,9 @@ classdef dfana
         end
 
         function rho = calcrho(sol, mesh_option)
-            % Calculates the space charge density
+
+            % calculates the space charge density
+
             [u, t, x, par, dev_in, n_whole, p_whole, a_whole, c_whole, V_whole] = dfana.splitsol(sol);
 
             switch mesh_option
@@ -512,6 +523,7 @@ classdef dfana
             ND = repmat(dev.ND, length(t), 1);
             Nani = repmat(dev.Nani, length(t), 1);
             Ncat = repmat(dev.Ncat, length(t), 1);
+
             % charge density
             rho = -n + p - NA + ND + par.z_a * a + par.z_c * c - par.z_a * Nani - par.z_c * Ncat;
         end
@@ -530,8 +542,10 @@ classdef dfana
         end
 
         function stats = JVstats(JVsol)
-            % A function to pull statistics from a JV sweep using DOJV
+
+            % a function to pull statistics from a JV sweep using DOJV
             % JVsol - a solution from DOJV
+
             if isfield(JVsol, 'ill')
 
                 if isfield(JVsol.ill, 'f')
@@ -560,7 +574,7 @@ classdef dfana
                         stats.FF_f = stats.mpp_f / (stats.Jsc_f * stats.Voc_f);
                     end
 
-                    %% Hysteresis Index
+                    % hysteresis index
                     A_f = abs(trapz(Vapp(Vapp >= 0 & Vapp <= stats.Voc_f), J.tot(Vapp >= 0 & Vapp <= stats.Voc_f, end)));
 
                 else
@@ -596,10 +610,10 @@ classdef dfana
                         stats.FF_r = stats.mpp_r / (stats.Jsc_r * stats.Voc_r);
                     end
 
-                    %% Hysteresis Factor
+                    % hysteresis factor
                     A_r = abs(trapz(Vapp(Vapp >= 0 & Vapp <= stats.Voc_r), J.tot(Vapp >= 0 & Vapp <= stats.Voc_r, end)));
 
-                    %% Sign to identify inverted hysteresis
+                    % sign to identify inverted hysteresis
                     if A_r >= A_f
                         B = 1;
                     elseif A_r < A_f
@@ -629,18 +643,20 @@ classdef dfana
         end
 
         function DeltaQFL = calcDeltaQFL(sol)
-            % Get QFLs
+            % get QFLs
             [~, ~, Efn, Efp] = dfana.calcEnergies(sol);
             par = sol.par;
 
             if par.p0_l >= par.n0_l && par.n0_r >= par.p0_r
                 % p-type left boundary, n-type right boundary
                 DeltaQFL = Efn(:, end) - Efp(:, 1);
+
             elseif par.n0_l >= par.n0_r && par.p0_r >= par.n0_r
                 % n-type left boundary, p-type right boundary
                 DeltaQFL = Efn(:, 1) - Efp(:, end);
+
             else
-                % If all equal the choose arbitrary boundaries
+                % if all equal the choose arbitrary boundaries
                 DeltaQFL = Efn(:, end) - Efp(:, 1);
             end
 
@@ -648,8 +664,7 @@ classdef dfana
 
         function deltaV = deltaVt(sol, p1, p2)
             [u, t, x, par, dev, n, p, a, c, V] = dfana.splitsol(sol);
-            % Calculates the electrostatic potential difference as a function of time
-            % between two points P1 and P2
+            % calculates the electrostatic potential difference as a function of time between two points P1 and P2
             deltaV = V(:, p1) - V(:, p2);
         end
 
@@ -683,6 +698,7 @@ classdef dfana
         end
 
         function [U, Ux] = pdentrp(singular, m, xL, uL, xR, uR, xout)
+
             % PDENTRP  Interpolation helper function for PDEPE.
             %   [U,UX] = PDENTRP(M,XL,UL,XR,UR,XOUT) uses solution values UL at XL and UR at XR
             %   for successive mesh points XL < XR to interpolate the solution values U and
@@ -703,7 +719,8 @@ classdef dfana
             Ux = zeros(size(U));
 
             uRL = uR - uL;
-            % Use singular interpolant on all subintervals.
+
+            % use singular interpolant on all subintervals
             if singular
                 U = U + uRL * ((xout .^ 2 - xL ^ 2) / (xR ^ 2 - xL ^ 2));
                 Ux = uRL * (2 * xout / (xR ^ 2 - xL ^ 2));

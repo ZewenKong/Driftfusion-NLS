@@ -41,11 +41,11 @@ logarithmically = 0; % 1, turn on; 0, turn off
 dfplot_ionic.CVapp(sol, xpos, current_type, area_coeff, absolutely, logarithmically);
 
 %%
-dfplot.JVapp(sol, xpos);
-% dfplot.ELxnpxacx(sol, 8);
+% dfplot.JVapp(sol, xpos);
+dfplot.ELxnpxacx(sol, 8);
 
 %%
-% dfplot.ELxnpxacx(soleq.ion);
+dfplot.ELxnpxacx(soleq.ion);
 
 % 
 % calculate the 'calc', by using the sol.u,x,t;

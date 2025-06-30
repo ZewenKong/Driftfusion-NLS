@@ -1,18 +1,20 @@
 function solstruct = df(varargin)
     %
-    % The core DRIFTFUSION function organises properties and inputs for pdepe,
+    % the core DRIFTFUSION function organises properties and inputs for pdepe,
     % a routine to test solving the diffusion and drift equations using the matlab pepde solver.
     %
-    % Solution outputs
+    % solution outputs
     % V = u(1) = electrostatic potential
     % n = u(2) = electron density
     % p = u(3) = holes density
     % c = u(4) = cation density (optional)
     % a = u(5) = anion density (optional)
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - DISCRAPTED - - - - - - - - - -
+    %
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
-    if length(varargin) == 0 % If no input parameter set then call pc directly
+    if length(varargin) == 0 % if no input parameter set then call pc directly
 
         par = pc;
         dficAnalytical = true;
@@ -51,7 +53,7 @@ function solstruct = df(varargin)
 
     end
 
-    %% - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
+    % - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
     % physics constants
     kB = par.kB; q = par.q; e = par.e; epp0 = par.epp0; T = par.T;
@@ -169,7 +171,7 @@ function solstruct = df(varargin)
     Rs_initial = par.Rs_initial;
     Field_switch = dev.Field_switch;
 
-    %% - - - - - - - - - - GENERATION FUNCTION - - - - - - - - - -
+    % - - - - - - - - - - GENERATION FUNCTION - - - - - - - - - -
 
     g1_fun = fun_gen(par.g1_fun_type); % g1_fun_type, is used to control the light source time-dependence (const)
     g2_fun = fun_gen(par.g2_fun_type);
@@ -228,7 +230,7 @@ function solstruct = df(varargin)
     ul_maxvar = zeros(N_max_variables, 1);
     ur_maxvar = zeros(N_max_variables, 1);
 
-    %% - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
+    % - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
 
     % latest ver.
     % options = odeset( ...
@@ -242,7 +244,7 @@ function solstruct = df(varargin)
         'RelTol', par.RelTol, ...
         'AbsTol', par.AbsTol);
 
-    %% - - - - - - - - - - CALL SOLVER - - - - - - - - - -
+    % - - - - - - - - - - CALL SOLVER - - - - - - - - - -
 
     % inputs with '@' are function handles to the subfunctions
     % below for the: equation, initial conditions, boundary conditions
@@ -426,7 +428,7 @@ function solstruct = df(varargin)
         i = i + 1;
     end
 
-    %% - - - - - - - - - - INITIAL CONDITIONS - - - - - - - - - -
+    % - - - - - - - - - - INITIAL CONDITIONS - - - - - - - - - -
 
     function u0 = dfic(x)
 
@@ -483,7 +485,7 @@ function solstruct = df(varargin)
         i = i + 1;
     end
 
-    %% - - - - - - - - - - BOUNDARY CONDITIONS - - - - - - - - - -
+    % - - - - - - - - - - BOUNDARY CONDITIONS - - - - - - - - - -
 
     % refer to PDEPE help for the precise meaning of P and Q;
     % l and r refer to left and right boundaries.

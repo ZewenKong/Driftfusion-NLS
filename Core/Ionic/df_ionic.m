@@ -1,10 +1,10 @@
 function solstruct = df_ionic(varargin)
     %
-    % Adapted from the df.m file,
+    % adapted from the df.m file,
     % perform the Nernst and Butler-Volmer calculation,
-    % to simulate the ionic flux in Driftfusion.
+    % to simulate the ionic flux in Driftfusion
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     % check is the 'calc' existing or not,
     % clear/reset the 'calc' data structure in workshop
@@ -12,6 +12,7 @@ function solstruct = df_ionic(varargin)
     clear calc;
     dfana_ionic.save_calcdata('reset');
 
+    % input process
     if length(varargin) == 0
         par = pc;
         dficAnalytical = true;
@@ -46,14 +47,10 @@ function solstruct = df_ionic(varargin)
 
     end
 
-    %% - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
+    % - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
     % check the df_ionic is run for equilibrate or simulation
     isEquilibrate = par.isEquilibrate;
-    % a0_l = 4.5e8;
-    % sa_l = 1e2;
-    a0_r = 9.7e8; % equilibraium anion density
-    sa_r = 1e2;
 
     % temperature
     T = par.T;
@@ -72,7 +69,7 @@ function solstruct = df_ionic(varargin)
     E_hyd = par.E_hyd; % standard hydrogen electrode (SHE)
     z = par.z; % no. of electrons involved in the electrode reaction
     j0_r = par.j0_right; % exchange current density (right side)
-    j0_l = par.j0_left;
+    sa_r = par.sa_r; % ionic charge recombination rate
     alpha_e = par.alpha_c; % electrode charge transfer coefficient
 
     % spatial mesh
@@ -187,7 +184,7 @@ function solstruct = df_ionic(varargin)
     Rs_initial = par.Rs_initial;
     Field_switch = dev.Field_switch;
 
-    %% - - - - - - - - - - GENERATION FUNCTION - - - - - - - - - -
+    % - - - - - - - - - - GENERATION FUNCTION - - - - - - - - - -
 
     g1_fun = fun_gen(par.g1_fun_type); % constant
     g2_fun = fun_gen(par.g2_fun_type);
@@ -248,7 +245,7 @@ function solstruct = df_ionic(varargin)
     ul_maxvar = zeros(N_max_variables, 1);
     ur_maxvar = zeros(N_max_variables, 1);
 
-    %% - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
+    % - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
 
     % original ver.
     % options = odeset('MaxStep', par.MaxStepFactor*0.1*par.tmax, ... % MaxStep = limit maximum time step size during integration
@@ -259,18 +256,19 @@ function solstruct = df_ionic(varargin)
     % options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ...
     %     'RelTol', 1e-4, ... % increase the limit to achieve fast pde convergence
     %     'AbsTol', 1e-7); % increase the limit to achieve fast pde convergence
+
     options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ...
         'RelTol', 1e-5, ... % increase the limit to achieve fast pde convergence
         'AbsTol', 1e-10); % increase the limit to achieve fast pde convergence
 
-    %% - - - - - - - - - - CALL SOLVER - - - - - - - - - -
+    % - - - - - - - - - - CALL SOLVER - - - - - - - - - -
 
     disp("model: " + isEquilibrate);
     disp('-');
 
     u = pdepe(par.m, @dfpde, @dfic, @dfbc, x, t, options);
 
-    %% - - - - - - - - - - OUTPUTS - - - - - - - - - -
+    % - - - - - - - - - - OUTPUTS - - - - - - - - - -
 
     solstruct.u = u; % save 'u' to the 'solstruct.u' structural variable
     solstruct.x = x;
@@ -281,7 +279,7 @@ function solstruct = df_ionic(varargin)
         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
     end
 
-    %% - - - - - - - - - - SUBFUNCTIONS - - - - - - - - - -
+    % - - - - - - - - - - SUBFUNCTIONS - - - - - - - - - -
 
     function [C, F, S] = dfpde(x, t, u, dudx)
 
@@ -432,6 +430,12 @@ function solstruct = df_ionic(varargin)
                 Vapp = Vapp_fun(par.V_fun_arg, t); % V_fun_arg = 0
         end
 
+        % boundary potential - left/right electrode alignment (to SHE, same criterion as E_st)
+        E_l = E_hyd - par.Phi_left; % E_hyd = -4.44 (in vaccum), E_st = -0.152 (in SHE)
+        E_r = E_l - V_r; % V_r = = Vbi - Vapp - Vres; initially, Vapp is 0, and V_r = Vbi
+
+        a0_r = dfana_ionic.deneq(E_r, E_st, R, T, F, z);
+
         % ============================================================
         % === Butler-Volmer Electrochemical current/flux             =
         % ============================================================
@@ -440,39 +444,40 @@ function solstruct = df_ionic(varargin)
 
         % right boundary
         % transfer the density to chemical activity at right boundary
-        rho_r_bnd = dfana_ionic.denstochemact(a_r);
+        rho_r_bnd = dfana_ionic.denstochemact(a_r, A);
         % the chemical potential of iodine interstitial at right boundary,
         % used in butler-volmer calculation
         E_eq_r = dfana_ionic.nernst(rho_r_bnd, E_st, R, T, F, z);
 
         % left boundary
-        rho_l_bnd = dfana_ionic.denstochemact(a_l);
+        rho_l_bnd = dfana_ionic.denstochemact(a_l, A);
         E_eq_l = dfana_ionic.nernst(rho_l_bnd, E_st, R, T, F, z);
 
         % butler-volmer equation
 
-        % In resistive switching, the reaction between iodine interstitial and silver electrode happens,
+        % in resistive switching, the reaction between iodine interstitial and silver electrode happens,
         % Ag + I- <--> AgI + e-
-        % the butler-volmer current arises from the reaction.
-        %
-        % In driftfusion, the potential of the left electrode is set to zero;
+        % the butler-volmer current arises from the reaction
+
+        % in driftfusion, the potential of the left electrode is set to zero;
         % therefore, an adjustment is added to the standard potential.
         % In details, the left electrode is set to be zero (reference point),
         % but in vaccum the hydrogen is the reference point,
-        % the standard potential of the Ag/AgI should be adjusted.
+        % the standard potential of the Ag/AgI should be adjusted
 
-        % boundary potential - left/right electrode alignment (to SHE, same criterion as E_st)
-        E_l = E_hyd - par.Phi_left; % E_hyd = -4.44 (in vaccum), E_st = -0.152 (in SHE)
-        E_r = E_l - V_r; % V_r = = Vbi - Vapp - Vres; initially, Vapp is 0, and V_r = Vbi
+        % % boundary potential - left/right electrode alignment (to SHE, same criterion as E_st)
+        % E_l = E_hyd - par.Phi_left; % E_hyd = -4.44 (in vaccum), E_st = -0.152 (in SHE)
+        % E_r = E_l - V_r; % V_r = = Vbi - Vapp - Vres; initially, Vapp is 0, and V_r = Vbi
+
         % overpotential
         eta_l = E_l - E_eq_l;
         eta_r = E_r - E_eq_r;
-        % butler-volmer current
-        j_bv_l = -dfana_ionic.butlervolmer(j0_l, alpha_e, R, T, F, E_l, E_eq_l);
+
+        % butler-volmer current & ionic flux
         j_bv_r = dfana_ionic.butlervolmer(j0_r, alpha_e, R, T, F, E_r, E_eq_r);
-        % butler-volmer ionic flux
-        f_bv_l = (-j_bv_l) / e;
         f_bv_r = (-j_bv_r) / e;
+        % j_bv_l = -dfana_ionic.butlervolmer(j0_l, alpha_e, R, T, F, E_l, E_eq_l);
+        % f_bv_l = (-j_bv_l) / e;
 
         % save the calculated data
         dfana_ionic.save_calcdata("t", t, ...
@@ -480,11 +485,8 @@ function solstruct = df_ionic(varargin)
             "E_eq_r", E_eq_r, ...
             "E_l", E_l, ...
             "E_r", E_r, ...
-            "eta_l", eta_l, ...
             "eta_r", eta_r, ...
-            "j_bv_l", j_bv_l, ...
             "j_bv_r", j_bv_r, ...
-            "a_l_bnd", a_l, ...
             "a_r_bnd", a_r);
 
         if Rs == 0
@@ -502,10 +504,9 @@ function solstruct = df_ionic(varargin)
 
         % check the "df_ionic.m" is used for equilibrate or simulate
         if isEquilibrate == "eq" % equilibrate
-            % Pl_a = mobseti * (-sa_l * (a_l - a0_l));
             Pr_a = mobseti * (sa_r * (a_r - a0_r));
+
         else % simulate (butler-volmer ionic flux)
-            % Pl_a = f_bv_l;
             Pr_a = f_bv_r;
         end
 
@@ -513,7 +514,7 @@ function solstruct = df_ionic(varargin)
               mobset * (-sn_l * (n_l - n0_l));
               mobset * (-sp_l * (p_l - p0_l));
               0;
-              0; ]; % Pl_a
+              0; ];
 
         Ql = [0;
               1;

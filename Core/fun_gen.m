@@ -31,7 +31,7 @@ function fun = fun_gen(fun_type)
     % by the Free Software Foundation, either version 3 of the License, or
     % (at your option) any later version.
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     switch fun_type
         case 'constant'

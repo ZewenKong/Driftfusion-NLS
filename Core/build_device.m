@@ -10,7 +10,7 @@ function dev = build_device(par, meshoption)
     % by the Free Software Foundation, either version 3 of the License, or
     % (at your option) any later version.
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     switch meshoption
         case 'whole'
@@ -68,13 +68,11 @@ function dev = build_device(par, meshoption)
     dev.dint = build_property(0, xmesh, par, 'dint', 1);
 
     %  switches
-
+    dev.int_switch = build_property(0, xmesh, par, 'int_switch', 1);
+    dev.bulk_switch = abs(dev.int_switch - 1);
     % property vriable name is 0,
     % `init_switch`, at interface = 1, at layer = 0;
     % `bulk_switch`, at interface = 0, at lyaer = 1;
-
-    dev.int_switch = build_property(0, xmesh, par, 'int_switch', 1);
-    dev.bulk_switch = abs(dev.int_switch - 1);
 
     if par.vsr_mode
         dev.vsr_zone = build_property(0, xmesh, par, 'vsr_zone', 1);

@@ -3,7 +3,7 @@ classdef dfplot_ionic
     % Driftfusion-mem dfplot content:
     % dfplot.JXT
 
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     methods (Static)
 
