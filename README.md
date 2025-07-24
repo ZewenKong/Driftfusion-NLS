@@ -12,5 +12,6 @@ p.calado13@imperial.ac.uk
 Please log bugs through GitHub.
 
 ## 
-Research Project by Zewen Kong (2025); 
-Inclusion of the Butler–Volmer equation in the boundary‑condition calculations and implementation of analysis functions.
+Research Project by Zewen Kong (2025)
+
+Inclusion of the Butler–Volmer equation in the boundary‑condition calculations and implementation of analysis functions
