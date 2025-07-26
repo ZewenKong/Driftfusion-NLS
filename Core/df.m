@@ -253,7 +253,7 @@ function solstruct = df(varargin)
     % a 3D matrix for which the dimensions are [time, spacem variables]
     % u icludes, V, n, p, c, a (in order)
 
-    u = pdepe(par.m, @dfpde, @dfic, @dfbc, x, t, options);
+    u = pdepe(par.m, @dfNLSde, @dfic, @dfbc, x, t, options);
 
     %% - - - - - - - - - - OUTPUTS - - - - - - - - - -
     % solutions and meshes to structure
@@ -289,7 +289,7 @@ function solstruct = df(varargin)
     % C = Time-dependence prefactor; F = Flux terms; S = Source terms;
     % dudx is the MATLAB-created variable.
 
-    function [C, F, S] = dfpde(x, t, u, dudx)
+    function [C, F, S] = dfNLSde(x, t, u, dudx)
 
         % reset position point
         if x == x_sub(1) % x_sub, the device thickness array

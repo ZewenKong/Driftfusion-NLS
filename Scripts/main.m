@@ -1,29 +1,38 @@
-% - - - - - - - - - - initialisation
-equilibrate_init();
-initialise_df;
+% acx
+% JV scan w / wo bv --> difference in amount of ions
+% overpotential
+% electrochemical reaction -> change the ion amount -> change the
+% electrical property
 
-% - - - - - - - - - - C2C
-% ON/OFF ratio; SET/REST voltage
-% Endurance test; Stochasticity/Variability test
-C2C;
+% obeservation -> persistance obsereved
 
-% - - - - - - - - - - D2D_var
-% Stochasticity/Variability test
-D2D_device;
+% persistance obeserve in experiment, but not in simulation
+% the state disapper with time
 
-% CV
-% change potential --> overpotential --> ionic species generate
-% check potential change and ions amount change
+% ionic charge carriers can be move
+% ions can be reacted
+
+% key feature of memristor
+
+%%
+% single
+% total ionic charge (C cm^-2) v.s. time (t)
+% with out butler volmer is 0
+% if bv turned on, will not 0
 %
+% Q v.s. Vapp (w, w/o bv)
+% J v.s. Vapp
+% ELx to analysis
+% total charge in two cases
+% parameters
 
-% one layer (just PCBM with some iodine interstial)
-%
+% bulk (mapi)
+% turn off bv, comparison 
 
-% pc.m file check
-% the 'B_ionic' variable
+% the ions mobility illustration
+% ionic can be move 
+% -> ionic can be react
+% energy / charge plot
 
-% comparison of CV w and w/o BV
-% change the start point (0.292)
-% 0 -> 1.3 -> -0.7
-
-% calculate the variable back (overpotential ...)
+% 1) base case -> 2) ionic mobility -> 3) no Bv, but has recombination
+% ionic (Pool Frenkel recombination reaction) -> 4) has bv

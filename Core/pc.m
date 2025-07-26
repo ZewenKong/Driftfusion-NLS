@@ -275,17 +275,16 @@ classdef pc
 
         % recombination (radiative), r_rad = k(np - ni^2)
         B = [3.6e-12]; % radiative recombination coefficient [cm3 s-1]
-        B_ionic = 0;
-        % B_ionic = 1e-15; % * for single layer device simulation
-        % B_ionic = [0, 0, 0, 1e-15, 0]; % * sandwitch device simulation
+        B_ionic = [0, 0, 0, 1e-15, 0]; % * sandwitch device simulation, for single layer device simulation
 
         % nernst equation calculation
         E_st = -0.152; % standard potential of Ag + I- --> AgI + e-
         z = 1; % charge transfer (AgI + e- <--> Ag+ + I-)
 
         % butler-volmer calculation
-        j0_right = 1e-8;
-        j0_left = 0;
+        j0 = 1e-1; % right boundary consideration (A/cm^-2)
+        % https://pubs.rsc.org/en/content/articlehtml/2013/cp/c3cp50738f
+        % for ECM (silve filament), but can be used here to describe surface reaction
 
         % equilibrium
         sa_l = 1e2;

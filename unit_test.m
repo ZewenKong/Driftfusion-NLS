@@ -59,213 +59,213 @@ df(soleq.ion, 'test');
 % solstruct = df(varargin)
 df(soleq.ion, par);
 
-%% Core dfplot ELx
+%% Core df_plot ELx
 
 % ELx(varargin)
-dfplot.ELx(soleq.ion)
-dfplot.ELx(JVsol.ill.f, [0, 100])
+df_plot.ELx(soleq.ion)
+df_plot.ELx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot Jt
+%% Core df_plot Jt
 
 % Jt(sol, xpos)
-dfplot.Jt(JVsol.ill.f, 2e-5)
+df_plot.Jt(JVsol.ill.f, 2e-5)
 
-%% Core dfplot Jx
+%% Core df_plot Jx
 
 % Jx(varargin)
-dfplot.Jx(soleq.ion)
-dfplot.Jx(JVsol.ill.f, [0, 100])
+df_plot.Jx(soleq.ion)
+df_plot.Jx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot jx
+%% Core df_plot jx
 
 % jx(varargin)
-dfplot.jx(soleq.ion)
-dfplot.jx(JVsol.ill.f, [0, 100])
+df_plot.jx(soleq.ion)
+df_plot.jx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot JV
+%% Core df_plot JV
 
 % JV(JV, option)
-dfplot.JV(JVsol, 3)
+df_plot.JV(JVsol, 3)
 
-%% Core dfplot Jddx
+%% Core df_plot Jddx
 
 % Jddx(varargin)
-dfplot.Jddx(soleq.ion)
-dfplot.Jddx(JVsol.ill.f, [0, 100])
+df_plot.Jddx(soleq.ion)
+df_plot.Jddx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot Voct
+%% Core df_plot Voct
 
 % Voct(sol)
-dfplot.Voct(JVsol.ill.f)
+df_plot.Voct(JVsol.ill.f)
 
-%% Core dfplot PLt
+%% Core df_plot PLt
 
 % PLt(sol)
-dfplot.PLt(JVsol.ill.f)
+df_plot.PLt(JVsol.ill.f)
 
-%% Core dfplot Vappt
+%% Core df_plot Vappt
 
 % Vappt(sol)
-dfplot.Vappt(JVsol.ill.f)
+df_plot.Vappt(JVsol.ill.f)
 
-%% Core dfplot JVapp
+%% Core df_plot JVapp
 
 % JVapp(sol, xpos)
-dfplot.JVapp(soleq.ion, 2e-5)
+df_plot.JVapp(soleq.ion, 2e-5)
 
-%% Core dfplot JtotVapp
+%% Core df_plot JtotVapp
 
 % JtotVapp(sol, xpos)
-dfplot.JtotVapp(JVsol.ill.f, 2e-5)
+df_plot.JtotVapp(JVsol.ill.f, 2e-5)
 
-%% Core dfplot logJVapp
+%% Core df_plot logJVapp
 
 % logJVapp(sol, xpos)
-dfplot.logJVapp(JVsol.ill.f, 2e-5)
+df_plot.logJVapp(JVsol.ill.f, 2e-5)
 
-%% Core dfplot logJVapp3D
+%% Core df_plot logJVapp3D
 
 % logJVapp3D(sol, xpos, ylogon)
-dfplot.logJVapp3D(JVsol.ill.f, 2e-5, true)
+df_plot.logJVapp3D(JVsol.ill.f, 2e-5, true)
 
-%% Core dfplot xmesh
+%% Core df_plot xmesh
 
 % xmesh(sol)
-dfplot.xmesh(soleq.ion)
+df_plot.xmesh(soleq.ion)
 
-%% Core dfplot Vx
+%% Core df_plot Vx
 
 % Vx(varargin)
-dfplot.Vx(soleq.ion)
-dfplot.Vx(JVsol.ill.f, [0, 100])
+df_plot.Vx(soleq.ion)
+df_plot.Vx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot npx
+%% Core df_plot npx
 
 % npx(varargin)
-dfplot.npx(soleq.ion)
-dfplot.npx(JVsol.ill.f, [0, 100])
+df_plot.npx(soleq.ion)
+df_plot.npx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot acx
+%% Core df_plot acx
 
 % acx(varargin)
-dfplot.acx(soleq.ion)
-dfplot.acx(JVsol.ill.f, [0, 100])
+df_plot.acx(soleq.ion)
+df_plot.acx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot gx
+%% Core df_plot gx
 
 % gx(varargin)
-dfplot.gx(JVsol.ill.f)
-dfplot.gx(JVsol.ill.f, [0, 100])
+df_plot.gx(JVsol.ill.f)
+df_plot.gx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot gxt
+%% Core df_plot gxt
 
 % gxt(sol)
-dfplot.gxt(JVsol.ill.f)
+df_plot.gxt(JVsol.ill.f)
 
-%% Core dfplot rx
+%% Core df_plot rx
 
 % rx(varargin)
-dfplot.rx(JVsol.ill.f)
-dfplot.rx(JVsol.ill.f, [0, 100])
+df_plot.rx(JVsol.ill.f)
+df_plot.rx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot JVrec
+%% Core df_plot JVrec
 
 % JVrec(JV, option)
-dfplot.JrecVapp(JVsol, 3)
+df_plot.JrecVapp(JVsol, 3)
 
-%% Core dfplot Ft
+%% Core df_plot Ft
 
 % Ft(sol, xpos)
-dfplot.Ft(JVsol.ill.f, 2e-5)
+df_plot.Ft(JVsol.ill.f, 2e-5)
 
-%% Core dfplot sigmat
+%% Core df_plot sigmat
 
 % sigmat(sol)
-dfplot.sigmat(JVsol.ill.f)
+df_plot.sigmat(JVsol.ill.f)
 
-%% Core dfplot Qt
+%% Core df_plot Qt
 
 % Qt(sol, x1, x2)
-dfplot.Qt(JVsol.ill.f, JVsol.ill.f.x(1), JVsol.ill.f.x(end))
+df_plot.Qt(JVsol.ill.f, JVsol.ill.f.x(1), JVsol.ill.f.x(end))
 
-%% Core dfplot QVapp
+%% Core df_plot QVapp
 
 % QVapp(sol, x1, x2)
-dfplot.QVapp(JVsol.ill.f, JVsol.ill.f.x(1), JVsol.ill.f.x(end))
+df_plot.QVapp(JVsol.ill.f, JVsol.ill.f.x(1), JVsol.ill.f.x(end))
 
-%% Core dfplot rhox
+%% Core df_plot rhox
 
 % rhox(varargin)
-dfplot.rhox(soleq.ion)
-dfplot.rhox(JVsol.ill.f, [0, 100])
+df_plot.rhox(soleq.ion)
+df_plot.rhox(JVsol.ill.f, [0, 100])
 
-%% Core dfplot deltarhox
+%% Core df_plot deltarhox
 
 % deltarhox(varargin)
-dfplot.deltarhox(JVsol.ill.f)
-dfplot.deltarhox(JVsol.ill.f, [0, 100])
+df_plot.deltarhox(JVsol.ill.f)
+df_plot.deltarhox(JVsol.ill.f, [0, 100])
 
-%% Core dfplot rhoxFxVx
+%% Core df_plot rhoxFxVx
 
 % rhoxFxVx(varargin)
-dfplot.rhoxFxVx(soleq.ion)
-dfplot.rhoxFxVx(JVsol.ill.f, [0, 100])
+df_plot.rhoxFxVx(soleq.ion)
+df_plot.rhoxFxVx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot rhoxVx
+%% Core df_plot rhoxVx
 
 % rhoxVx(varargin)
-dfplot.rhoxVx(soleq.ion)
-dfplot.rhoxVx(JVsol.ill.f, [0, 100])
+df_plot.rhoxVx(soleq.ion)
+df_plot.rhoxVx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot ELx_single
+%% Core df_plot ELx_single
 
 % ELx_single(varargin)
-dfplot.ELx(soleq.ion)
-dfplot.ELx(JVsol.ill.f, [0, 100])
+df_plot.ELx(soleq.ion)
+df_plot.ELx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot ELnpx
+%% Core df_plot ELnpx
 
 % ELnpx(varargin)
-dfplot.ELnpx(soleq.ion)
-dfplot.ELnpx(JVsol.ill.f, [0, 100])
+df_plot.ELnpx(soleq.ion)
+df_plot.ELnpx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot Vxacx
+%% Core df_plot Vxacx
 
 % Vacx(varargin)
-dfplot.Vxacx(soleq.ion)
-dfplot.Vxacx(JVsol.ill.f, [0, 100])
+df_plot.Vxacx(soleq.ion)
+df_plot.Vxacx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot Vionacx
+%% Core df_plot Vionacx
 
 % Vionacx(varargin)
-dfplot.Vionxacx(soleq.ion)
-dfplot.Vionxacx(JVsol.ill.f, [0, 100])
+df_plot.Vionxacx(soleq.ion)
+df_plot.Vionxacx(JVsol.ill.f, [0, 100])
 
-%% Core dfplot Fiont
+%% Core df_plot Fiont
 
 % Fiont(sol, xpos)
-dfplot.Fiont(JVsol.ill.f, 2e-5)
+df_plot.Fiont(JVsol.ill.f, 2e-5)
 
-%% Core dfplot colourblocks
+%% Core df_plot colourblocks
 
 % colourblocks(sol, yrange)
-dfplot.colourblocks(soleq.ion, [0, 1])
+df_plot.colourblocks(soleq.ion, [0, 1])
 
-%% Core dfplot sortarg
+%% Core df_plot sortarg
 
 % [sol, tarr, pointtype, xrange] = sortarg(args)
 test_tarr = [0, 10, 100];
 test_xrange = [150, 250];
-[~, ~, ~, ~] = dfplot.sortarg({JVsol.ill.f});
-[~, tarr, ~, ~] = dfplot.sortarg({JVsol.ill.f, test_tarr});
+[~, ~, ~, ~] = df_plot.sortarg({JVsol.ill.f});
+[~, tarr, ~, ~] = df_plot.sortarg({JVsol.ill.f, test_tarr});
 assert(all(tarr == test_tarr))
-[~, tarr, ~, xrange] = dfplot.sortarg({JVsol.ill.f, test_tarr, test_xrange});
+[~, tarr, ~, xrange] = df_plot.sortarg({JVsol.ill.f, test_tarr, test_xrange});
 assert(all([tarr == test_tarr, xrange == test_xrange]))
 
-%% Core dfplot x2d
+%% Core df_plot x2d
 
 % x2d(sol, xmesh, variables, legstr, linestyle, ylab, tarr, xrange, logx, logy)
-dfplot.x2d(JVsol.ill.f, JVsol.ill.f.x, {JVsol.ill.f.u(:, :, 1)}, {'test'}, ['-', '.'], 'ylab', JVsol.ill.f.t, [150, 250], false, false)
+df_plot.x2d(JVsol.ill.f, JVsol.ill.f.x, {JVsol.ill.f.u(:, :, 1)}, {'test'}, ['-', '.'], 'ylab', JVsol.ill.f.t, [150, 250], false, false)
 
 %% Core build_device
 
@@ -283,98 +283,98 @@ build_property(par.g0, par.xx, par, 'zeroed', 0);
 build_property(par.Phi_EA, par.xx, par, 'lin_graded', 1);
 build_property(par.Nc, par.xx, par, 'log_graded', 1);
 
-%% Core dfana splitsol
+%% Core df_analysis splitsol
 
 % [u,t,x,par,dev,n,p,a,c,V] = splitsol(sol)
-dfana.splitsol(soleq.ion);
+df_analysis.splitsol(soleq.ion);
 
-%% Core dfana calcEnergies
+%% Core df_analysis calcEnergies
 
 % [Ecb, Evb, Efn, Efp] = calcEnergies(sol)
-dfana.calcEnergies(soleq.ion);
+df_analysis.calcEnergies(soleq.ion);
 
-%% Core dfana calcJ
+%% Core df_analysis calcJ
 
 % [J, j, x] = calcJ(sol)
-dfana.calcJ(soleq.ion);
+df_analysis.calcJ(soleq.ion);
 
-%% Core dfana calcg
+%% Core df_analysis calcg
 
 % [g1, g2, g] = calcg(sol)
-dfana.calcg(soleq.ion);
+df_analysis.calcg(soleq.ion);
 
-%% Core dfana calcr
+%% Core df_analysis calcr
 
 % r = calcr(sol, mesh_option)
-dfana.calcr(soleq.ion, "whole");
-dfana.calcr(soleq.ion, "sub");
+df_analysis.calcr(soleq.ion, "whole");
+df_analysis.calcr(soleq.ion, "sub");
 
-%% Core dfana calcJdd
+%% Core df_analysis calcJdd
 
 % [Jdd, jdd, xout] = calcJdd(sol)
-dfana.calcJdd(soleq.ion);
+df_analysis.calcJdd(soleq.ion);
 
-%% Core dfana calcF
+%% Core df_analysis calcF
 
 % [FV, Frho] = calcF(sol, mesh_option)
-dfana.calcF(soleq.ion, "whole");
-dfana.calcF(soleq.ion, "sub");
+df_analysis.calcF(soleq.ion, "whole");
+df_analysis.calcF(soleq.ion, "sub");
 
-%% Core dfana calcrho
+%% Core df_analysis calcrho
 
 % rho = calcrho(sol, mesh_option)
-dfana.calcrho(soleq.ion, "whole");
-dfana.calcrho(soleq.ion, "sub");
+df_analysis.calcrho(soleq.ion, "whole");
+df_analysis.calcrho(soleq.ion, "sub");
 
-%% Core dfana calcVapp
+%% Core df_analysis calcVapp
 
 % Vapp = calcVapp(sol)
-dfana.calcVapp(soleq.ion);
+df_analysis.calcVapp(soleq.ion);
 
-%% Core dfana JVstats
+%% Core df_analysis JVstats
 
 % stats = JVstats(JVsol)
-dfana.JVstats(JVsol);
+df_analysis.JVstats(JVsol);
 
-%% Core dfana calcPLt
+%% Core df_analysis calcPLt
 
 % value = calcPLt(sol)
-dfana.calcPLt(soleq.ion);
+df_analysis.calcPLt(soleq.ion);
 
-%% Core dfana calcDeltaQFL
+%% Core df_analysis calcDeltaQFL
 
 % VQFL = calcDeltaQFL(sol)
-dfana.calcDeltaQFL(soleq.ion);
+df_analysis.calcDeltaQFL(soleq.ion);
 
-%% Core dfana deltaVt
+%% Core df_analysis deltaVt
 
 % deltaV = deltaVt(sol, p1, p2)
-dfana.deltaVt(soleq.ion, 1, 123);
+df_analysis.deltaVt(soleq.ion, 1, 123);
 
-%% Core dfana calcsigma
+%% Core df_analysis calcsigma
 
 % sigma = calcsigma(sol)
-dfana.calcsigma(soleq.ion);
+df_analysis.calcsigma(soleq.ion);
 
-%% Core dfana calcsigma_ion
+%% Core df_analysis calcsigma_ion
 
 % sigma_ion = calcsigma_ion(sol)
-dfana.calcsigma_ion(soleq.ion);
+df_analysis.calcsigma_ion(soleq.ion);
 
-%% Core dfana calcFion
+%% Core df_analysis calcFion
 
 % Fion = calcFion(sol)
-dfana.calcFion(soleq.ion);
+df_analysis.calcFion(soleq.ion);
 
-%% Core dfana calcVion
+%% Core df_analysis calcVion
 
 % Vion = calcVion(sol)
-dfana.calcVion(soleq.ion);
+df_analysis.calcVion(soleq.ion);
 
-%% Core dfana pdentrp
+%% Core df_analysis pdentrp
 
 % [U,Ux] = pdentrp(singular,m,xL,uL,xR,uR,xout)
-dfana.pdentrp(false, false, par.xx(123), soleq.ion.u(1, 123, 1), par.xx(124), soleq.ion.u(1, 124, 1), 1e-6);
+df_analysis.pdentrp(false, false, par.xx(123), soleq.ion.u(1, 123, 1), par.xx(124), soleq.ion.u(1, 124, 1), 1e-6);
 
 %% Core ditro_fun nfun
 
@@ -389,7 +389,7 @@ distro_fun.pfun(par.dev.Nv, par.dev.Phi_IP, par.dev.EF0, par);
 %% Core ditro_fun Dn_fd_fun and Dnlook and Efn_fd_fun
 
 Ec = -4.95;
-[~, ~, Efn, ~] = dfana.calcEnergies(soleq.ion);
+[~, ~, Efn, ~] = df_analysis.calcEnergies(soleq.ion);
 % Dnfd = Dn_fd_fun(Nc, Ec, Efn, mu_n, T)
 Dnfd = distro_fun.Dn_fd_fun(par.dev.Nc(end), Ec, Efn, par.mu_n(end), par.T);
 
@@ -401,7 +401,7 @@ distro_fun.Efn_fd_fun(soleq.ion.u(2, 1, end), Efn, Dnfd.n_fd);
 
 %% Core ditro_fun Dp_fd_fun and Dplook and Efp_fd_fun
 
-[~, ~, ~, Efp] = dfana.calcEnergies(soleq.ion);
+[~, ~, ~, Efp] = df_analysis.calcEnergies(soleq.ion);
 % Dpfd = Dp_fd_fun(Nv, Ev, Efp, mu_p, T)
 Dpfd = distro_fun.Dp_fd_fun(par.dev.Nv(1), par.Phi_IP(1), Efp, par.mu_p(1), par.T);
 
@@ -528,7 +528,7 @@ getpointpos(1e-6, soleq.ion.x);
 %% Helper makemovie
 
 % Framefile = makemovie(sol, plotfun, xrange, yrange, movie_name, Vcounter, tcounter)
-makemovie(JVsol.dk.f, @dfplot.ELx, [0, 100e-7], 0, 'test_makemovie_delete_me', true, true);
+makemovie(JVsol.dk.f, @df_plot.ELx, [0, 100e-7], 0, 'test_makemovie_delete_me', true, true);
 
 %% Helper verifyStabilization
 

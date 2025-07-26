@@ -35,6 +35,6 @@ function sol = VappFunction(sol_ini, Vapp_func, Vapp_coeff, tmax, tpoints, logti
         par.t0 = 0;
     end
 
-    sol = df_ionic(sol_ini, par); % sol = df(sol_ini, par);
+    sol = dfNLS(sol_ini, par); % sol = df(sol_ini, par);
 
 end
