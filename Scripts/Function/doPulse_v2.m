@@ -53,7 +53,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
         par.V_fun_arg(2) = V_bias(i);
         par.V_fun_arg(3) = 1e-2;
 
-        sol = dfNLS(sol_ill, par); % call dfNLS.m
+        sol = dfII(sol_ill, par); % call dfII.m
 
         par = sol.par;
         par.tmesh_type = 1;
@@ -64,7 +64,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
         par.V_fun_arg(1) = V_bias(i);
 
         disp(['doPulse_v2.m: stabilising solution at ' num2str(V_bias(i)) ' V']);
-        Pv2sol{i, 1} = dfNLS(sol, par);
+        Pv2sol{i, 1} = dfII(sol, par);
     end
 
     for i = 1:num_bias % perform the pulsed JV for each V_bias (stabilise at V_bias)
@@ -94,7 +94,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
             par.V_fun_arg(3) = tramp;
 
             try
-                sol = dfNLS(sol, par);
+                sol = dfII(sol, par);
             catch
                 warning(['doPulse_v2.m: could not ramp to voltage for V_pulse = ' num2str(V_pulse(j)) ' V'])
                 sol = 0;
@@ -119,7 +119,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
 
                 disp(['doPulse_v2.m: V_pulse = ' num2str(V_pulse(j)) ' V']);
 
-                sol = dfNLS(sol, par); % assign the solution
+                sol = dfII(sol, par); % assign the solution
                 Pv2sol{i, j + 1} = sol;
 
                 % [J_peak, ~, xmesh] = df_analysis.calcJ(Pv2sol{i, j + 1});
@@ -142,7 +142,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
                 par.V_fun_arg(3) = tramp;
 
                 try
-                    sol = dfNLS(Pv2sol{i, j + 1}, par);
+                    sol = dfII(Pv2sol{i, j + 1}, par);
                 catch
                     warning(['doPulse_v2.m: could not ramp down to V_bias for V_pulse = ' num2str(V_pulse(j)) ' V'])
                     sol = Pv2sol{i, j + 1};
@@ -159,7 +159,7 @@ function Pv2sol = doPulse_v2(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, tr
                 par.V_fun_arg(1) = V_bias(i);
 
                 try
-                    sol = dfNLS(sol, par);
+                    sol = dfII(sol, par);
                 catch
                     warning('doPulse_v2.m: could not go back to V_bias')
                     sol = Pv2sol{i, j + 1};

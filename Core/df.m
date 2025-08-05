@@ -10,8 +10,6 @@ function solstruct = df(varargin)
     % c = u(4) = cation density (optional)
     % a = u(5) = anion density (optional)
     %
-    % - - - - - - - - - - DISCRAPTED - - - - - - - - - -
-    %
     % - - - - - - - - - - CODE START - - - - - - - - - -
 
     if length(varargin) == 0 % if no input parameter set then call pc directly
@@ -149,10 +147,6 @@ function solstruct = df(varargin)
     Rs = par.Rs; % series resistance
     gamma = par.gamma; % blakemore approximation coefficient, 0 for boltzmann stats
 
-    % original ver.
-    % B = device.B;
-    %
-    % updated ver.
     B = device.B; % radiative recombination rate coefficient
     B_ionic = device.B_ionic; % * rate coefficient for ions and vacancies
 
@@ -342,50 +336,10 @@ function solstruct = df(varargin)
         C_a = 1;
         C = [C_V; C_n; C_p; C_c; C_a];
 
-        % flux terms
-        %
-        % flux, 通量项(物理量在空间上传递或流动的速率)
-
         F_V = (epp(i) / epp_factor) * dVdx;
-
-        % Electrons flux term
-        %
-        % First Part: 漂移 Drift
-        %
-        % mu_n, electron mobility
-        % n, electron density
-        % (-dVdx + gradEA(i)), 驱动电子运动的驱动力
-        % dVdx, 电势梯度产生的电场; gradEA(i), 电子亲和能的梯度用于修正电场
-        %
-        % Second Part: 扩散 Diffusion
-        %
-        % G_n, diffusion enhancement prefactor
-        % kB * T, thermal energy
-        % dndx, 电子密度的空间梯度
-        % 在标准的扩散模型中, 电子扩散通量通常与浓度梯度有关, 即可用 dndx 表示.
-        % But, 当导带有效态密度 Nc 在空间上不是均匀的时, 电子的浓度 n 与 Nc 之间的归一化关系（n/Nc）会发生变化.
-        % ((n/Nc(i)) * gradNc(i))) 的作用是补偿由于 Nc 非均匀变化带来的额外贡献, 梯度修正项.
-        % n/Nc(i) 表示在位置 i 处电子浓度相对于该点导带有效态密度的归一化值 (normalisation value).
 
         F_n = mu_n(i) * n * (-dVdx + gradEA(i)) + (G_n * mu_n(i) * kB * T * (dndx - ((n / Nc(i)) * gradNc(i))));
         F_p = mu_p(i) * p * (dVdx - gradIP(i)) + (G_p * mu_p(i) * kB * T * (dpdx - ((p / Nv(i)) * gradNv(i))));
-
-        % Cation flux term
-        %
-        % First Part: 漂移 Drift (z_c * c * dVdx)
-        %
-        % z_c = 1, cation charge value (+1)
-        % c, cation density
-        % dVdx, 电势梯度产生的电场
-        %
-        % Second Part: 扩散 Diffusion
-        %
-        % kB * T, thermal energy
-        % dcdx, 阳离子浓度的梯度 (阳离子浓度 c 关于空间坐标 x 的梯度)
-        % (c * (dcdx/(c_max(i) - c))) 项
-        % 考虑了当阳离子浓度接近上限 c_max(i) 时, 拥挤效应的修正.
-        % 当阳离子浓度 c 增加时, 它们在空间中的排列会变得更加密集; 当浓度接近上限 c_max(i) 时, 离子之间会相互拥挤, 限制它们的自由扩散
-        % 乘以 c 可以看作是在高浓度区域中, 拥挤效应对扩散的影响更为显著.
 
         F_c = mu_c(i) * (z_c * c * dVdx + kB * T * (dcdx + (c * (dcdx / (c_max(i) - c)))));
         F_a = mu_a(i) * (z_a * a * dVdx + kB * T * (dadx + (a * (dadx / (a_max(i) - a)))));
@@ -409,15 +363,8 @@ function solstruct = df(varargin)
         S_n = g - r_np;
         S_p = g - r_np;
 
-        % ion and vacancy recombination
-        % original ver. (no ionic recombination)
-        % S_c = 0; S_a = 0;
-        %
-        % updated ver. (ion Frenkel pair recombination)
-        % [V_I][I-] <-> ([I_0])^2 % equilibrium reaction at interface PMPbI/PCBM
-        r_iv = radset * B_ionic(i) * (a * c - ((dev.Nani(i)) * (dev.Ncat(i)))); % radiative
-        S_c =- r_iv;
-        S_a =- r_iv;
+        S_c = 0;
+        S_a = 0;
 
         S = [S_V; S_n; S_p; S_c; S_a];
 

@@ -8,7 +8,7 @@ function soleq = equilibrate(varargin)
     % 0 = runs full equilibrate protocol
     % 1 = skips ion equilibration
 
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     if length(varargin) == 1 % varargin is a cell array
 
@@ -69,7 +69,7 @@ function soleq = equilibrate(varargin)
     par.mobseti = 0; % switch off mobilities (ionic)
 
     disp('equilibrate.m: solution initialisation (zero mobility)'); disp('-');
-    sol = df(sol, par); % CALL df.m
+    sol = df(sol, par);
     disp('equilibrate.m: complete initialisation (zero mobility)'); disp('-');
 
     % INITIAL SOLUTION W/ MOBILITY
@@ -87,7 +87,7 @@ function soleq = equilibrate(varargin)
     par.t0 = par.tmax / 1e6;
 
     disp('equilibrate.m: solution initialisation (electronic mobility)'); disp('-');
-    sol = df(sol, par); % CALL df.m
+    sol = df(sol, par);
 
     all_stable = verifyStabilization(sol.u, sol.t, 0.7); % check the solution reached a stabilized status (solution matrix, time array, time increment fraction)
 
@@ -133,8 +133,6 @@ function soleq = equilibrate(varargin)
 
         disp('equilibrate.m: solution initialisation (electronic and ionic mobility)'); disp('-');
 
-        % original ver.
-        %
         % only allows for non-zero mobility in active layer),
         % take ratio of electron and ion mobilities in the active layer
         %
@@ -165,11 +163,7 @@ function soleq = equilibrate(varargin)
         par.tmax = 1e4 * t_diff;
         par.t0 = par.tmax / 1e3;
 
-        % original ver.
-        % sol = df(sol, par);
-        %
-        % updated ver.
-        sol = dfNLS(sol, par);
+        sol = dfII(sol, par);
 
         all_stable = verifyStabilization(sol.u, sol.t, 0.7);
 
@@ -188,16 +182,19 @@ function soleq = equilibrate(varargin)
             par.tmax = par.tmax * 10;
             par.t0 = par.tmax / 1e6;
 
-            % original ver.
-            % sol = df(sol, par);
-            %
-            % updated ver.
-            sol = dfNLS(sol, par);
+            sol = dfII(sol, par);
 
             all_stable = verifyStabilization(sol.u, sol.t, 0.7);
         end
 
         soleq.ion = sol; % write solution
+
+        % disp(size(soleq.ion.t));
+        % disp(soleq.ion.t);
+        size_t = size(soleq.ion.t);
+        size_u = size(soleq.ion.u);
+        fprintf('t size = [%d %d], u size = [%d %d %d]\n', size_t, size_u);
+
         sol_ic = extract_IC(soleq.ion, [soleq.ion.t(end) * 0.7, soleq.ion.t(end)]); % manually check solution for VSR self-consitency
         compare_rec_flux(sol_ic, par.RelTol_vsr, par.AbsTol_vsr, 0);
 

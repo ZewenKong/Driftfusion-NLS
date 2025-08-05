@@ -36,7 +36,33 @@ classdef pc
 
     properties
 
-        isEquilibrate = "eq"; % equilibrate parmeter: 1, equilibrate turns on; 0, equilibrate turns off
+        % - - - - - driftfusionNLS: new parameters [pc.m]
+        % equilibrate parmeter
+        isEquilibrate = "eq"; % 1, equilibrate turns on; 0, equilibrate turns off
+
+        % electrochemical switch
+        isECM = "ecm_off";
+
+        % recombination (radiative), r_rad = k(np - ni^2)
+        B = [1e-12]; % radiative recombination coefficient [cm3 s-1]
+        B_ionic = [0, 0, 0, 0, 0]; % sandwitch device simulation; B_ionic = [0]; % single layer device simulation
+        k0_trap = 0;
+        dynamic_adp = 0; % adapative gain in dynamic
+
+        % nernst
+        E_st = -0.152; % standard potential of Ag + I- --> AgI + e-
+        alpha_a = 0.5; % anode charge transfer coefficient
+        alpha_c = 0.5; % cathode charge transfer coefficient
+        E_hyd = -4.44; % vaccum potential for hydrogen
+        z = 1; % charge transfer (AgI + e- <--> Ag+ + I-)
+
+        % butler-volmer (https://pubs.rsc.org/en/content/articlehtml/2013/cp/c3cp50738f)
+        j0 = 0; % right boundary consideration (A/cm^-2)
+
+        % equilibrium term
+        sa_l = 1e2;
+        sa_r = 1e2;
+        % - - - - - END
 
         T = 300; % temperature [K]
 
@@ -101,7 +127,6 @@ classdef pc
         tpoints = 100; % Number of time points
 
         % general control parameters
-
         mobset = 1; % switch on/off electron hole mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         mobseti = 1; % switch on/off ionic carrier mobility- MUST BE SET TO ZERO FOR INITIAL SOLUTION
         SRHset = 1; % switch on/off SRH recombination - recommend setting to zero for initial solution
@@ -201,7 +226,7 @@ classdef pc
         mu_c = [1e-10];
         mu_a = [1e-12];
 
-        % Ref.
+        % ref.
         % PTPD h+ mobility: https://pubs.rsc.org/en/content/articlehtml/2014/ra/c4ra05564k
         % PEDOT mu_n = 0.01 cm2V-1s-1 https://aip.scitation.org/doi/10.1063/1.4824104
         % TiO2 mu_n = 0.09 cm2V-1s-1 Bak2008
@@ -272,27 +297,6 @@ classdef pc
         J_E_func = [];
         J_E_func_tilted = [];
         E2_func = [];
-
-        % recombination (radiative), r_rad = k(np - ni^2)
-        B = [3.6e-12]; % radiative recombination coefficient [cm3 s-1]
-        B_ionic = [0, 0, 0, 1e-15, 0]; % * sandwitch device simulation, for single layer device simulation
-
-        % nernst equation calculation
-        E_st = -0.152; % standard potential of Ag + I- --> AgI + e-
-        z = 1; % charge transfer (AgI + e- <--> Ag+ + I-)
-
-        % butler-volmer calculation
-        j0 = 1e-1; % right boundary consideration (A/cm^-2)
-        % https://pubs.rsc.org/en/content/articlehtml/2013/cp/c3cp50738f
-        % for ECM (silve filament), but can be used here to describe surface reaction
-
-        % equilibrium
-        sa_l = 1e2;
-        sa_r = 1e2;
-
-        alpha_a = 0.5; % anode charge transfer coefficient
-        alpha_c = 0.5; % cathode charge transfer coefficient
-        E_hyd = -4.44; % vaccum potential for hydrogen
 
     end
 

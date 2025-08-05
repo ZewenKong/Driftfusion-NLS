@@ -660,6 +660,19 @@ classdef df_plot
                 {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
         end
 
+        % for c.f.
+        function ELx_v2(varargin)
+            % SOL = the solution structure
+            % TARR = An array containing the times that you wish to plot
+            % XRANGE = 2 element array with [xmin, xmax]
+            [sol, tarr, pointtype, xrange] = df_plot.sortarg(varargin);
+            [u, t, x, par, dev, n, p, a, c, V] = df_analysis.splitsol(sol);
+            [Ecb, Evb, Efn, Efp] = df_analysis.calcEnergies(sol);
+
+            df_plot.x2d(sol, x, {Efn, Efp, Ecb, Evb}, {'E_{fn}', 'E_{fp}', 'E_{CB}', 'E_{VB}'}, ...
+                {'--', '--', '-', '-'}, 'Energy [eV]', tarr, xrange, 0, 0)
+        end
+
         % energy Level diagram, and charge densities plotter
         function ELx_uncontacted(varargin)
             % SOL = the solution structure

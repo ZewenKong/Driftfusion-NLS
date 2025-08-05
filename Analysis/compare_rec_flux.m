@@ -26,7 +26,7 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
     % the difference is ignored (lower values tend to have much higher relative
     % errors)
     %
-    %% - - - - - - - - - - CODE START - - - - - - - - - -
+    % - - - - - - - - - - CODE START - - - - - - - - - -
 
     par = sol.par;
     u = sol.u;
@@ -36,8 +36,10 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
     x = par.xx;
     x_sub = par.x_sub;
 
-    % Calculate alpha and beta- note these are referenced to the direction of x
-    % NOT x_n and x_p
+    % disp("compare_rec_flux.m: " + size(u)); % * debug
+    % disp("compare_rec_flux.m: " + length(t)); % * debug
+
+    % calculate alpha and beta- note these are referenced to the direction of x NOT x_n and x_p
     dVdx = zeros(length(t), length(x_sub));
 
     for i = 1:length(t)
@@ -52,10 +54,10 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
     n = u(:, :, 2);
     p = u(:, :, 3);
 
-    % Driftfusion 3D
+    % driftfusion 3D
     rx = df_analysis.calcr(sol, "sub");
 
-    % Get indexes of interfaces
+    % get indexes of interfaces
     % int_index = find(contains(par.layer_type, 'interface'));   % only
     % compatible from 2016 onwards
     int_logical = zeros(1, length(par.layer_type));
@@ -66,8 +68,8 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
 
     loc = find(int_logical); % interface layer locations
 
-    ns = zeros(length(t), length(loc)); % Store time array of each ns in new column
-    ps = zeros(length(t), length(loc)); % Store time array of each ps in new column
+    ns = zeros(length(t), length(loc)); % store time array of each ns in new column
+    ps = zeros(length(t), length(loc)); % store time array of each ps in new column
     R_abrupt = zeros(length(t), length(loc));
     R_vsr = zeros(length(t), length(loc));
     sigma = zeros(length(t), length(loc));
@@ -81,7 +83,7 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
         nt = par.nt(loc(i));
         pt = par.pt(loc(i));
 
-        % Check location of interfacial surface carrier densities
+        % check location of interfacial surface carrier densities
         p_L = pcum1(loc(i) - 1);
         p_R = pcum1(loc(i));
 
@@ -104,7 +106,7 @@ function sigma_sum_filter = compare_rec_flux(sol, RelTol_vsr, AbsTol_vsr, plot_s
 
         R_abrupt(:, i) = (ns(:, i) .* ps(:, i) - nt * pt) ./ ((1 / sn) .* (ps(:, i) + pt) + (1 / sp) .* (ns(:, i) + nt));
 
-        %% Fractional difference
+        % fractional difference
         sigma(:, i) = ((R_abrupt(:, i) - R_vsr(:, i)) ./ R_abrupt(:, i));
 
         if plot_switch

@@ -1,7 +1,8 @@
 %% - - - - - - - - - - CODE START - - - - - - - - - -
 
-input = 'Input_files/pmpi_v2.csv';
-cat_density = [1e16, 1e17, 1e18, 1e19, 1e20];
+input = 'Input_files/pmpi.csv';
+% cat_density = [1e16, 1e17, 1e18, 1e19, 1e20];
+cat_density = [1e16, 1e18];
 var = cat_density;
 
 par = pc(input);

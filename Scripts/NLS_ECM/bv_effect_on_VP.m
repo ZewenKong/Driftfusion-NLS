@@ -2,25 +2,25 @@
 
 % pulse height and time
 V_bias = 0; % stabilisation bias (0 V)
-t_stab = 20; % stabilisation time
+t_stab = 50; % stabilisation time
 
-V_set = 0.5; % SET voltage
+V_set = 0.; % SET voltage
 V_read = 0.1; % read voltage
-V_pulse = [V_set, V_read, V_read, V_read, V_read, V_read]; % pulse voltage array
-t_pulse_set = 5;
-t_pulse_read = 5e-2;
-t_pulse = [t_pulse_set, t_pulse_read, t_pulse_read, t_pulse_read, t_pulse_read, t_pulse_read];
+V_pulse = [V_set, V_read, V_read, V_read]; % pulse voltage array
+t_pulse_set = 2e-1;
+t_pulse_read = 2e-2;
+t_pulse = [t_pulse_set, t_pulse_read, t_pulse_read, t_pulse_read];
 
 % pulse shape
 t_ramp = 1e-5; % ramp time for voltage transitions
-t_cycle = 2; % one complete pulse time + relexation time
+t_cycle = 5; % one complete pulse time + relexation time
 light_intensity = 0;
 
 %% Simulation With BV
 
 % parameter setting
 % input = 'Input_files/single-layer.csv';
-input = 'Input_files/mapi.csv';
+input = 'Input_files/pmpi.csv';
 par_bv = pc(input);
 par_bv = refresh_device(par_bv);
 soleq_bv = equilibrate(par_bv);
@@ -36,6 +36,9 @@ sol_bv = doPulse_v2(soleq_bv.ion, V_bias, V_pulse, t_pulse, t_cycle, t_stab, t_r
 % parameter setting
 par = pc(input);
 par.j0 = 0;
+par.mu_c = [0, 0, 2.25e-14, 0, 0];
+par.mu_a = [0, 0, 2.25e-14, 0, 0];
+par.B_ionic = [0, 0, 0, 0, 0];
 par.mobseti = 0;
 par = refresh_device(par);
 soleq = equilibrate(par);
@@ -72,7 +75,7 @@ for i = 1:length(sols)
         mean_J = mean(J_peak); % mean value of J_peak
         % multiple = 5; % if the data is 5x larger than the mean_J => outlier
         % filter = (J_peak <= multiple * mean_J) & (J_peak >= 0);
-        filter = J_peak >= 0;
+        filter = J_peak <= 1e10;
         J_peak_filtered = J_peak(filter);
         t_peak_filtered = t_peak(filter);
         t_global = t_offset + t_peak_filtered; % global time series (for plot)
@@ -155,5 +158,5 @@ for i = 1:length(J_sampling_pnts)
         'Color', colors(i, :), ...
         'DisplayName', label);
 end
-
+xlabel('Applied Voltage, Vapp [V]');
 legend('show');

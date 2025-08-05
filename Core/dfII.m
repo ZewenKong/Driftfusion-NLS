@@ -1,4 +1,4 @@
-function solstruct = dfNLS(varargin)
+function solstruct = dfII(varargin)
     %
     % adapted from the df.m file,
     % perform the Nernst and Butler-Volmer calculation,
@@ -47,8 +47,21 @@ function solstruct = dfNLS(varargin)
 
     % - - - - - - - - - - UNPACK PROPERTIES - - - - - - - - - -
 
-    % [ionic] check the dfNLS is run for equilibrate or simulation
-    isEquilibrate = par.isEquilibrate;
+    % - - - - - driftfusionNLS: model switch [dfII.m]
+    isEquilibrate = par.isEquilibrate; % equilibrate 'eq' or simulation 'sim'
+    isECM = par.isECM; % electrochemical switch
+    k0_trap = par.k0_trap;
+    dynamic_adp = par.dynamic_adp;
+    % - - - - - END
+
+    % - - - - - driftfusionNLS: physical consts (nernst & butler-volmer) [dfII.m]
+    E_st = par.E_st; % standard potential for (Ag + I- <--> AgI + e-, 0.152 eV)
+    E_hyd = par.E_hyd; % standard hydrogen electrode (SHE)
+    z = par.z; % no. of electrons involved in the electrode reaction
+    j0 = par.j0; % exchange current density (right side)
+    sa_r = par.sa_r; % ionic charge recombination rate
+    alpha_e = par.alpha_c; % electrode charge transfer coefficient
+    % - - - - - END
 
     % temperature
     T = par.T;
@@ -62,19 +75,12 @@ function solstruct = dfNLS(varargin)
     F = par.F; % Faraday constant
     A = par.A; % Avogadro constant
 
-    % [ionic] physical constants (nernst & butler-volmer)
-    E_st = par.E_st; % standard potential for (Ag + I- <--> AgI + e-, 0.152 eV)
-    E_hyd = par.E_hyd; % standard hydrogen electrode (SHE)
-    z = par.z; % no. of electrons involved in the electrode reaction
-    j0 = par.j0; % exchange current density (right side)
-
-    sa_r = par.sa_r; % ionic charge recombination rate
-    alpha_e = par.alpha_c; % electrode charge transfer coefficient
-
     % dependent properties
     Vbi = par.Vbi; % built-in voltage
     n0_l = par.n0_l; n0_r = par.n0_r; % equilibrium electron density
     p0_l = par.p0_l; p0_r = par.p0_r; % equilibrium hole density
+
+    dev = par.dev; % device parameters
 
     % spatial mesh
     xmesh = par.xx; % spatial mesh, thickness of the device
@@ -89,10 +95,9 @@ function solstruct = dfNLS(varargin)
     N_variables = par.N_ionic_species + 3; % no. of variables in this solution (+3 for V, n, and p)
     N_max_variables = par.N_max_variables; % maximum number of variables in this version
 
-    dev = par.dev; % device parameters
     device = par.dev_sub; % device sub parameters
 
-    % [ionic] charge parameters
+    % charge parameters
     mu_n = device.mu_n; % electron mobility
     mu_p = device.mu_p; % hole mobility
     mu_c = device.mu_c; % cation mobility
@@ -149,8 +154,8 @@ function solstruct = dfNLS(varargin)
     alpha0_xn = device.alpha0_xn; % alpha0_xn is alpha for F = 0 reference to xprime_n
     beta0_xp = device.beta0_xp; % beta0_xp is beta for F = 0 referenced to xprime_p
 
-    z_c = par.z_c;
-    z_a = par.z_a;
+    z_c = par.z_c; % +1
+    z_a = par.z_a; % -1
 
     n0_l = par.n0_l; n0_r = par.n0_r; % equilibrium charge (electron, hole) density
     p0_l = par.p0_l; p0_r = par.p0_r;
@@ -161,9 +166,10 @@ function solstruct = dfNLS(varargin)
     Rs = par.Rs; % series resistance
     gamma = par.gamma;
 
-    % [ionic] recombination (electronic & ionic)
+    % - - - - - driftfusionNLS: recombination coefficient [dfII.m]
     B = device.B; % electronic
-    B_ionic = device.B_ionic; % [ionic] -> (build_device.m)
+    B_ionic = device.B_ionic; % ionic
+    % - - - - - END
 
     % switches and accelerator coefficients
     mobset = par.mobset; % electronic carrier transport switch
@@ -244,27 +250,30 @@ function solstruct = dfNLS(varargin)
 
     % - - - - - - - - - - SOLVER OPTIONS - - - - - - - - - -
 
-    % options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ... % MaxStep = limit maximum time step size during integration
-    %     'RelTol', par.RelTol, ...
-    %     'AbsTol', par.AbsTol);
-
-    options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ...
-        'RelTol', 1e-1, ... % increase the limit to achieve fast pde convergence
-        'AbsTol', 1e-2); % increase the limit to achieve fast pde convergence
+    options = odeset('MaxStep', par.MaxStepFactor * 0.1 * par.tmax, ... % MaxStep = limit maximum time step size during integration
+        'RelTol', par.RelTol, ... % increase the limit to achieve fast pde convergence
+        'AbsTol', par.AbsTol); % increase the limit to achieve fast pde convergence
 
     % - - - - - - - - - - CALL SOLVER - - - - - - - - - -
 
-    disp("model: " + isEquilibrate);
+    % - - - - - driftfusionNLS: model disp [dfII.m]
+    disp("dfII.m - model: " + isEquilibrate);
     disp('-');
+    % - - - - - END
 
-    u = pdepe(par.m, @dfNLSde, @dfic, @dfbc, x, t, options);
+    % inputs with '@' are function handles to the subfunctions
+    % below for the: equation, initial conditions, boundary conditions
+    % u, the solution matrix, a 3D matrix for which the dimensions are [time, spacem variables]
+    % u icludes, V, n, p, c, a (in order)
+
+    u = pdepe(par.m, @dfpde, @dfic, @dfbc, x, t, options);
 
     % - - - - - - - - - - OUTPUTS - - - - - - - - - -
 
     solstruct.u = u; % save 'u' to the 'solstruct.u' structural variable
     solstruct.x = x;
     solstruct.t = t;
-    solstruct.par = par;
+    solstruct.par = par; % store parameters object
 
     if par.vsr_mode == 1 && par.vsr_check == 1
         compare_rec_flux(solstruct, par.RelTol_vsr, par.AbsTol_vsr, 0);
@@ -272,13 +281,21 @@ function solstruct = dfNLS(varargin)
 
     % - - - - - - - - - - SUBFUNCTIONS - - - - - - - - - -
 
-    function [C, F, S] = dfNLSde(x, t, u, dudx)
+    % set up partial differential equation (pdepe) (see MATLAB pdepe help for details of C,F,S),
+    % C = Time-dependence prefactor; F = Flux terms; S = Source terms; dudx is the MATLAB-created variable
 
-        if x == x_sub(1)
+    % - - - - - driftfusionNLS: model disp [dfII.m]
+    disp("dfII.m - ECM switch state: " + isECM);
+    disp('-');
+    % - - - - - END
+
+    function [C, F, S] = dfpde(x, t, u, dudx)
+
+        if x == x_sub(1) % reset position point
             i = 1;
         end
 
-        if g1_fun_type_constant
+        if g1_fun_type_constant % generation function (illumination)
             gxt1 = int1 * gx1(i);
         else
             gxt1 = g1_fun(g1_fun_arg, t) * gx1(i);
@@ -292,22 +309,23 @@ function solstruct = dfNLS(varargin)
 
         g = gxt1 + gxt2;
 
+        % unpack variables, assign first 'N_variables' value of u and dudx
         u_maxvar(1:N_variables) = u;
         dudx_maxvar(1:N_variables) = dudx;
 
-        V = u_maxvar(1); % 1st variable is V
+        V = u_maxvar(1);
         n = u_maxvar(2);
         p = u_maxvar(3);
         c = u_maxvar(4);
         a = u_maxvar(5);
 
-        dVdx = dudx_maxvar(1);
+        dVdx = dudx_maxvar(1); % dVdx, 电场的局部变化率
         dndx = dudx_maxvar(2);
         dpdx = dudx_maxvar(3);
         dcdx = dudx_maxvar(4);
         dadx = dudx_maxvar(5);
 
-        G_n = Nc(i) / (Nc(i) - gamma * n);
+        G_n = Nc(i) / (Nc(i) - gamma * n); % diffusion enhancement prefactors (gamma = 0 for Boltz)
         G_p = Nv(i) / (Nv(i) - gamma * p);
 
         C_V = 0;
@@ -318,8 +336,10 @@ function solstruct = dfNLS(varargin)
         C = [C_V; C_n; C_p; C_c; C_a];
 
         F_V = (epp(i) / epp_factor) * dVdx;
+        % electronic flux term
         F_n = mu_n(i) * n * (-dVdx + gradEA(i)) + (G_n * mu_n(i) * kB * T * (dndx - ((n / Nc(i)) * gradNc(i))));
         F_p = mu_p(i) * p * (dVdx - gradIP(i)) + (G_p * mu_p(i) * kB * T * (dpdx - ((p / Nv(i)) * gradNv(i))));
+        % ionic flux term
         F_c = mu_c(i) * (z_c * c * dVdx + kB * T * (dcdx + (c * (dcdx / (c_max(i) - c)))));
         F_a = mu_a(i) * (z_a * a * dVdx + kB * T * (dadx + (a * (dadx / (a_max(i) - a)))));
 
@@ -340,12 +360,27 @@ function solstruct = dfNLS(varargin)
         S_n = g - r_np;
         S_p = g - r_np;
 
-        r_iv = radset * B_ionic(i) * (a * c - ((dev.Nani(i)) * (dev.Ncat(i)))); % radiative
+        % - - - - - driftfusionNLS: ions annihilation and recombination [dfII.m]
+        % non-negativity constraint on ion denstiy
+        a = max(a, 0); c = max(c, 0);
 
-        S_c =- r_iv;
-        S_a =- r_iv;
+        % Poole-Frenkel recombination
+        delta_ac = a * c - ((dev.Nani(i)) * (dev.Ncat(i)));
+        r_iv = radset * B_ionic(i) * (delta_ac);
+
+        if isECM == "ecm_on"
+            % ions trapping/detrapping
+            ions_bias = abs(a - dev.Nani(i)) / dev.Nani(i) + abs(c - dev.Ncat(i)) / dev.Ncat(i); % anion bias ratio + cation bias ratio
+            k_trap = 1 * (k0_trap + (dynamic_adp * ions_bias));
+            S_a = (-r_iv) + k_trap * (dev.Nani(i) - a); % (-r_iv), recombination
+            S_c = (-r_iv) + k_trap * (dev.Ncat(i) - c); % (k_trap * (dev.Nani(i) - a)), trapping/detrapping
+        else
+            S_a = (-r_iv);
+            S_c = (-r_iv);
+        end
 
         S = [S_V; S_n; S_p; S_c; S_a];
+        % - - - - - END
 
         C = C(1:N_variables); % remove unused variables
         F = F(1:N_variables); %
@@ -356,11 +391,15 @@ function solstruct = dfNLS(varargin)
 
     function u0 = dfic(x)
 
+        % dfic, driftfusion initial condition return the initial condition, u0
+        % with data type - a numeric array []
+
         if x == x_sub(1)
             i = 1;
         end
 
         if length(par.dcell) == 1 % single layer
+            % dcell, numeric array includes cumulative thickness
             u0_ana = [
                       (x / xmesh(end)) * Vbi;
                       n0_l * exp((x * (log(n0_r) - log(n0_l))) / par.dcum0(end)); % electron density, n0(x), changes with the spatial x
@@ -368,7 +407,7 @@ function solstruct = dfNLS(varargin)
                       dev.Ncat(i); % cation density
                       dev.Nani(i); % anion density
                       ];
-        else
+        else % multi-layered
             u0_ana = [
                       (x / xmesh(end)) * Vbi;
                       dev.n0(i);
@@ -378,8 +417,9 @@ function solstruct = dfNLS(varargin)
                       ];
         end
 
-        u0_ana = u0_ana(1:N_variables);
+        u0_ana = u0_ana(1:N_variables); % confirm the u0_ana with size of N_variables
 
+        % organise ICs based on number of variables and SOL_IC
         if dficAnalytical
             u0 = u0_ana;
         else
@@ -399,6 +439,9 @@ function solstruct = dfNLS(varargin)
     end
 
     function [Pl, Ql, Pr, Qr] = dfbc(xl, ul, xr, ur, t) % Driftfusion boundary condition
+
+        % refer to PDEPE help for the precise meaning of P and Q;
+        % l and r refer to left and right boundaries
 
         ul_maxvar(1:N_variables) = ul;
         ur_maxvar(1:N_variables) = ur;
@@ -495,7 +538,7 @@ function solstruct = dfNLS(varargin)
 
         end
 
-        % check the "dfNLS.m" is used for equilibrate or simulate
+        % check the "dfII.m" is used for equilibrate or simulate
         if isEquilibrate == "eq" % equilibrate
             Pr_a = mobseti * (sa_r * (a_r - a0_r));
         else % simulate (butler-volmer ionic flux)

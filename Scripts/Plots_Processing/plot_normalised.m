@@ -1,4 +1,4 @@
-h = openfig('Model_Validation/SSP_Model/ana_results_mun/lat.fig');
+h = openfig('NLS_SSP_Transport/Results/latt_const.fig');
 
 % Set figure size to be square
 size_inch = 5; % for example, 6 inches x 6 inches

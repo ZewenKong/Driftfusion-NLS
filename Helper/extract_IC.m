@@ -1,4 +1,5 @@
 function sol_ic = extract_IC(sol, requested_time)
+
     % EXTRACT INITIAL CONDITIONS
     % This function takes a single time point from the solution SOL closest to
     % REQUESTED_TIME and outputs a solution SOL_IC with only that time point. This can
@@ -19,12 +20,6 @@ function sol_ic = extract_IC(sol, requested_time)
         index_temp2 = find(sol.t <= requested_time(2));
         index(2) = index_temp2(end);
     end
-
-    % disp('----- DEBUG extract_IC -----');
-    % disp(['size(sol.u)      = [' num2str(size(sol.u)) ']']);
-    % disp(['length(sol.t)    = ' num2str(length(sol.t))]);
-    % disp(['requested_time   = [' num2str(requested_time) ']']);
-    % disp(['computed index   = [' num2str(index) ']']);
 
     sol_ic = sol;
     sol_ic.u = sol.u(index, :, :); % error

@@ -457,7 +457,7 @@ classdef df_analysis
                     jdd.adiff = -mu_ani .* par.kB * par.T .* dadx;
             end
 
-            % note these have a negative sign compared with the expressions in dfNLSDE
+            % note these have a negative sign compared with the expressions in dfPDE
             jdd.n = par.mobset * (jdd.ndrift + jdd.ndiff);
             jdd.p = par.mobset * (jdd.pdrift + jdd.pdiff);
             jdd.a = par.mobseti * (jdd.adrift + jdd.adiff);
@@ -836,7 +836,9 @@ classdef df_analysis
             eta_modified = (E - E_eq) - j_temp * R_series;
             eta_lim = 0.3; % eta limitation
             eta_soft = eta_modified ./ sqrt(1 + (eta_modified / eta_lim) .^ 2);
-            j_bv = (- j0) * (exp((1 - alpha_e) * F * eta_soft / (R * T)) - exp((- alpha_e) * F * eta_soft / (R * T)));
+            j_bv = (j0) * (exp((1 - alpha_e) * F * eta_soft / (R * T)) - exp((- alpha_e) * F * eta_soft / (R * T)));
+
+            % 0729, i remove the '-' in front of j0
 
             % j_bv = (- j0) * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T)));
             % j_bv = j0 * (exp((1 - alpha_e) * F * (E - E_eq) / (R * T)) - exp((- alpha_e) * F * (E - E_eq) / (R * T)));

@@ -19,6 +19,11 @@ function dev = build_device(par, meshoption)
             xmesh = par.x_sub;
     end
 
+    % - - - - - driftfusionNLS: new device parameters [build_device.m]
+    dev.B = build_property(par.B, xmesh, par, 'zeroed', 0); % build the device, B
+    dev.B_ionic = build_property(par.B_ionic, xmesh, par, 'constant', 0);
+    % - - - - - END
+
     % constant properties
     dev.mu_c = build_property(par.mu_c, xmesh, par, 'constant', 0);
     dev.mu_a = build_property(par.mu_a, xmesh, par, 'constant', 0);
@@ -46,9 +51,6 @@ function dev = build_device(par, meshoption)
 
     % properties that are zeroed in the interfaces
     dev.g0 = build_property(par.g0, xmesh, par, 'zeroed', 0);
-    dev.B = build_property(par.B, xmesh, par, 'zeroed', 0); % build the device, B
-    dev.B_ionic = build_property(par.B_ionic, xmesh, par, 'constant', 0); % interface between RPP and PCBM
-
     dev.NA = build_property(par.NA, xmesh, par, 'exp_graded', 0);
     dev.ND = build_property(par.ND, xmesh, par, 'exp_graded', 0);
 

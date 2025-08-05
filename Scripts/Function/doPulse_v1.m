@@ -20,7 +20,7 @@ function Pv1sol = doPulse_v1(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, li
         par.V_fun_arg(2) = V_bias(i);
         par.V_fun_arg(3) = 1e-2;
 
-        sol = dfNLS(sol_ill, par);
+        sol = dfII(sol_ill, par);
         par = sol.par;
 
         par.tmesh_type = 1;
@@ -31,7 +31,7 @@ function Pv1sol = doPulse_v1(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, li
         par.V_fun_arg(1) = V_bias(i);
 
         disp(['doPulse_v1.m: stabilising solution at ' num2str(V_bias(i)) ' V'])
-        Pv1sol{i, 1} = dfNLS(sol, par);
+        Pv1sol{i, 1} = dfII(sol, par);
 
     end
 
@@ -58,7 +58,7 @@ function Pv1sol = doPulse_v1(sol_ini, V_bias, V_pulse, tpulse, tcycle, tstab, li
             duty_cycle = 100 * tpulse(j) / tcycle;
             par.V_fun_arg(4) = duty_cycle; % the ratio of pulse time in total time
             disp(['doPulse_v1.m: V_pulse = ' num2str(V_pulse(j)) ' V'])
-            Pv1sol{i, j + 1} = dfNLS(Pv1sol{i, 1}, par);
+            Pv1sol{i, j + 1} = dfII(Pv1sol{i, 1}, par);
 
         end
 
