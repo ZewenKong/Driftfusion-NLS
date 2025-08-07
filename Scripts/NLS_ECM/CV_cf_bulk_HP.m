@@ -78,3 +78,5 @@ xlabel('Applied Voltage, Vapp [V]');
 ylabel('Current Density, J [A cm^{-2}]');
 legend('Location', 'northwest', 'FontSize', 10);
 yscale log; % logrithm
+
+%%

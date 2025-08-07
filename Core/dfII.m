@@ -357,30 +357,37 @@ function solstruct = dfII(varargin)
         r_np = r_rad + r_srh + r_vsr; % total electron and hole recombination
 
         S_V = (1 / (epp_factor * epp0)) * (-n + p - NA(i) + ND(i) + z_a * a + z_c * c - (z_a * Nani(i) + z_c * Ncat(i)));
+
         S_n = g - r_np;
         S_p = g - r_np;
 
         % - - - - - driftfusionNLS: ions annihilation and recombination [dfII.m]
         % non-negativity constraint on ion denstiy
-        a = max(a, 0); c = max(c, 0);
+        % a = max(a, 0); c = max(c, 0); % not work for single layer simulation
+
+        % % soft limited
+        a = 0.5 * (a + sqrt(a .^ 2 + eps));
+        c = 0.5 * (c + sqrt(c .^ 2 + eps));
 
         % Poole-Frenkel recombination
-        delta_ac = a * c - ((dev.Nani(i)) * (dev.Ncat(i)));
-        r_iv = radset * B_ionic(i) * (delta_ac);
+        delta_ac = a * c - dev.Nani(i) * dev.Ncat(i);
+        r_iv = radset * B_ionic(i) * delta_ac;
 
-        if isECM == "ecm_on"
-            % ions trapping/detrapping
-            ions_bias = abs(a - dev.Nani(i)) / dev.Nani(i) + abs(c - dev.Ncat(i)) / dev.Ncat(i); % anion bias ratio + cation bias ratio
-            k_trap = 1 * (k0_trap + (dynamic_adp * ions_bias));
+        % ions trapping/detrapping
+        ions_bias = abs(a - dev.Nani(i)) / dev.Nani(i) + abs(c - dev.Ncat(i)) / dev.Ncat(i); % anion bias ratio + cation bias ratio
+        k_trap = k0_trap + (dynamic_adp * ions_bias); % one percent trapping ratio
+
+        if B_ionic(i) ~= 0
             S_a = (-r_iv) + k_trap * (dev.Nani(i) - a); % (-r_iv), recombination
             S_c = (-r_iv) + k_trap * (dev.Ncat(i) - c); % (k_trap * (dev.Nani(i) - a)), trapping/detrapping
         else
-            S_a = (-r_iv);
-            S_c = (-r_iv);
+            S_a = k_trap * (dev.Nani(i) - a);
+            S_c = k_trap * (dev.Ncat(i) - c);
         end
 
-        S = [S_V; S_n; S_p; S_c; S_a];
         % - - - - - END
+
+        S = [S_V; S_n; S_p; S_c; S_a];
 
         C = C(1:N_variables); % remove unused variables
         F = F(1:N_variables); %

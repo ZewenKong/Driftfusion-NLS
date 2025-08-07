@@ -5,19 +5,18 @@ input = "Input_files/single_layer.csv";
 % measurement setting
 light_intensity = 0;
 V0 = 0; V_max = 1; V_min = -1;
-scan_rt = 0.05;
+scan_rt = 0.2;
 cycle = 1;
 time_pnts = 500;
 
 %% ECM
-par_ecm = pc(input);
+par_ecm = pc(input); 
 par_ecm.mobseti = 1;
 par_ecm.B_ionic = 1e-12;
-par_ecm.isECM = "ecm_on";
 par_ecm.k0_trap = 1e-6;
-par_ecm.dynamic_adp = 1e-3;
+par_ecm.dynamic_adp = 1e-9;
 
-par_ecm.RelTol = 1e-4;
+par_ecm.RelTol = 1e-6;
 par_ecm.AbsTol = 1e-8;
 par_ecm = refresh_device(par_ecm);
 
@@ -31,10 +30,10 @@ sol_ecm = doCV(soleq_ecm.ion, light_intensity, V0, V_max, V_min, scan_rt, cycle,
 par = pc(input);
 
 par.mobseti = 0;
-par.j0 = 0;
 par.B_ionic = 0;
-
-par.RelTol = 1e-4;
+par_ecm.k0_trap = 1e-6;
+par_ecm.dynamic_adp = 1e-9;
+par.RelTol = 1e-6;
 par.AbsTol = 1e-8;
 par = refresh_device(par);
 
@@ -44,6 +43,7 @@ soleq.ion.par.isEquilibrate = "sim";
 
 sol = doCV(soleq.ion, light_intensity, V0, V_max, V_min, scan_rt, cycle, time_pnts);
 
+%%
 % xpos = 0;
 % J = df_analysis.calcJ(sol);
 % Vapp = df_analysis.calcVapp(sol);
@@ -51,13 +51,8 @@ sol = doCV(soleq.ion, light_intensity, V0, V_max, V_min, scan_rt, cycle, time_pn
 % xmesh = sol.x;
 % ppos = getpointpos(xpos, xmesh);
 % plot(Vapp, J.tot(:, ppos));
+% 
 
-%% Plot
-labels = {'sol\_bv', 'sol'};
-x1 = 0; x2 = 5e-5; xpos = 0;
-sols = cell(1, 2);
-sols{1} = sol_ecm;
-sols{2} = sol;
 
 %% Q_ionic v.s. Vapp
 % figure('Name', 'Q_ionic v.s. Vapp');
@@ -81,7 +76,7 @@ sols{2} = sol;
 % %% Q_ionic v.s. time
 % figure('Name', 'Q_ionic v.s. time');
 % hold on;
-
+% 
 % for i = 1:length(sols)
 %     [u, t, x, par, dev, n, p, a, c, V] = df_analysis.splitsol(sols{i});
 %     rho_ionic = df_analysis.rhoIonicCalc(sols{i}, "whole");
@@ -98,6 +93,12 @@ sols{2} = sol;
 % hold off;
 
 %% J v.s. Vapp
+
+labels = {'sol\_bv', 'sol'};
+x1 = 0; x2 = 5e-5; xpos = 0;
+sols = cell(1, 2);
+sols{1} = sol_ecm;
+sols{2} = sol;
 figure('Name', 'J v.s. Vapp (BV c.f.)');
 hold on;
 
@@ -107,6 +108,8 @@ for i = 1:length(sols)
     t = sols{i}.t;
     xmesh = sols{i}.x;
     ppos = getpointpos(xpos, xmesh);
+    % plot(Vapp, J.a(:, ppos), 'DisplayName', labels{i});
+    % plot(Vapp, J.c(:, ppos), 'DisplayName', labels{i});
     plot(Vapp, J.tot(:, ppos), 'DisplayName', labels{i});
 end
 
